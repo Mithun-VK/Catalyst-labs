@@ -1,0 +1,728 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   CATALYST LABS - DESIGN SYSTEM
+   A single source of truth for colour, type, space, motion and elevation.
+   Nothing in the component layer should introduce a raw hex value or a
+   one-off duration; everything resolves back to a token defined here.
+   ========================================================================== */
+
+@theme {
+  /* --- Colour -------------------------------------------------------------
+     A near-black foundation with a warm off-white. One accent ("ember"),
+     used only for CTAs, live state and the single focal point of a section. */
+  --color-ink: #08090a; /* page ground */
+  --color-ink-raised: #0d0f11; /* panels sitting above the ground */
+  --color-ink-sunken: #050607; /* wells, code, inset areas */
+  --color-paper: #f2f1ec; /* primary text, inverted surfaces */
+  --color-paper-dim: #c9c8c2;
+
+  /* Both tiers clear WCAG AA for normal text on --color-ink. The tonal gap
+     between them is deliberately small: legibility outranks a prettier
+     hierarchy, and separation is carried by size and weight instead. */
+  --color-mute: #8b9099; /* secondary text - 6.2:1 on ink */
+  --color-mute-deep: #7a818b; /* tertiary text, labels - 5.1:1 on ink */
+
+  --color-ember: #ff5b28; /* the accent - 6.4:1 on ink */
+  --color-ember-soft: #ff7d54;
+  --color-ember-deep: #d13c12;
+
+  --color-line: rgb(242 241 236 / 0.09); /* hairline */
+  --color-line-strong: rgb(242 241 236 / 0.17);
+  --color-line-ember: rgb(255 91 40 / 0.35);
+
+  --color-positive: #6ee7a8;
+  --color-warn: #f5c451;
+
+  /* --- Type ---------------------------------------------------------------
+     Three families: a grotesque for everything structural, a mono for
+     technical metadata, and a serif italic used only for accent words. */
+  --font-display: var(--font-instrument-sans), ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+  --font-sans: var(--font-instrument-sans), ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", Menlo,
+    monospace;
+  --font-serif: var(--font-instrument-serif), ui-serif, Georgia, serif;
+
+  /* Fluid scale. Every step is clamp()ed so no breakpoint-specific font
+     sizes are needed in components. */
+  --text-display: clamp(3.25rem, 1.1rem + 8.2vw, 8rem);
+  --text-display--line-height: 0.92;
+  --text-display--letter-spacing: -0.042em;
+  --text-display--font-weight: 600;
+
+  --text-h1: clamp(2.5rem, 1.3rem + 4.4vw, 4.75rem);
+  --text-h1--line-height: 0.98;
+  --text-h1--letter-spacing: -0.035em;
+  --text-h1--font-weight: 600;
+
+  --text-h2: clamp(2rem, 1.35rem + 2.4vw, 3.25rem);
+  --text-h2--line-height: 1.04;
+  --text-h2--letter-spacing: -0.03em;
+  --text-h2--font-weight: 600;
+
+  --text-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.6rem);
+  --text-h3--line-height: 1.18;
+  --text-h3--letter-spacing: -0.02em;
+  --text-h3--font-weight: 500;
+
+  --text-lead: clamp(1.0625rem, 1rem + 0.42vw, 1.3125rem);
+  --text-lead--line-height: 1.55;
+  --text-lead--letter-spacing: -0.011em;
+
+  --text-body: 1rem;
+  --text-body--line-height: 1.65;
+
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.6;
+
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1;
+  --text-label--letter-spacing: 0.15em;
+  --text-label--font-weight: 500;
+
+  /* --- Space --------------------------------------------------------------
+     4px base. Section rhythm is fluid so the page breathes on large screens
+     without leaving mobile with dead vertical space. */
+  --spacing: 0.25rem;
+  --space-section: clamp(5.5rem, 3rem + 9vw, 11rem);
+  --space-gutter: clamp(1.25rem, 0.5rem + 2.6vw, 3.5rem);
+  --container-page: 84rem;
+
+  /* --- Radius -------------------------------------------------------------
+     Deliberately tight. Sharp corners read as engineered; large pill radii
+     read as generic SaaS template. */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+
+  /* --- Motion -------------------------------------------------------------
+     Entering uses ease-out, exiting uses ease-in, state changes use the
+     standard curve. Nothing exceeds 700ms. */
+  --ease-out-quart: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 150ms;
+  --duration-base: 240ms;
+  --duration-slow: 460ms;
+  --duration-reveal: 700ms;
+
+  /* --- Elevation ----------------------------------------------------------
+     Shadows are almost invisible; separation comes from hairlines and
+     surface value instead.
+
+     Tinted, not black. A pure-black shadow over a blue-leaning near-black
+     ground reads as a grey smudge; carrying the ground's own hue into the
+     shadow makes the surface look lit rather than dirty. */
+  --shadow-panel: 0 1px 0 0 rgb(242 241 236 / 0.045) inset,
+    0 24px 60px -30px rgb(3 5 12 / 0.92);
+  --shadow-lift: 0 30px 80px -40px rgb(3 5 12 / 1);
+  --shadow-ember: 0 0 0 1px rgb(255 91 40 / 0.4),
+    0 18px 50px -22px rgb(255 91 40 / 0.45);
+
+  /* Measure. ~65ch is the readable ceiling; the old max-w-2xl ran to ~78ch. */
+  --measure: 34rem;
+  --measure-wide: 42rem;
+}
+
+/* Named z-index scale - no magic numbers in components. */
+@theme {
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 20;
+  --z-nav: 40;
+  --z-overlay: 50;
+  --z-cursor: 60;
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--color-line);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Anchored sections clear the sticky nav. */
+    scroll-padding-top: 6rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    font-feature-settings: "cv02", "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* Guards against any child overflowing horizontally on small screens. */
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background-color: var(--color-ember);
+    color: var(--color-ink);
+  }
+
+  /* One focus treatment for the entire site: a high-contrast ember ring that
+     is visible on every surface value we use. */
+  :focus-visible {
+    outline: 2px solid var(--color-ember);
+    outline-offset: 3px;
+    border-radius: var(--radius-xs);
+  }
+
+  /* Only remove the default ring for pointer users - keyboard focus keeps it. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Inputs inherit the type system rather than the UA stylesheet. */
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* iOS zooms any field under 16px on focus. */
+  input,
+  textarea,
+  select {
+    font-size: max(1rem, var(--text-body));
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+/* ==========================================================================
+   PRIMITIVES
+   ========================================================================== */
+
+@utility container-page {
+  width: 100%;
+  max-width: var(--container-page);
+  margin-inline: auto;
+  padding-inline: var(--space-gutter);
+}
+
+/* Uppercase technical metadata: section eyebrows, field labels, node names. */
+@utility label {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  text-transform: uppercase;
+}
+
+/* The accent word treatment used inside headlines. */
+@utility accent-word {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* A hairline that fades out at both ends - used for section rules and the
+   vertical spines in the process and services sections. */
+@utility rule-x {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-line-strong) 12%,
+    var(--color-line-strong) 88%,
+    transparent
+  );
+}
+
+@utility rule-y {
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--color-line-strong) 8%,
+    var(--color-line-strong) 92%,
+    transparent
+  );
+}
+
+/* Fine engineering grid used as a section background. Two layers so the
+   1px lines stay crisp at any DPR. */
+/**
+ * Film grain.
+ *
+ * A single fixed overlay, generated by feTurbulence so there is no image
+ * request. It breaks the digital flatness of large near-black fields — the
+ * difference between a surface that looks printed and one that looks like an
+ * empty div. Deliberately weak: at 4.5% it is felt rather than seen.
+ *
+ * Sits above content but below the nav, never takes pointer events, and is
+ * hidden from assistive tech. One composited layer, no per-frame work.
+ */
+@utility grain {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-raised);
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* Numerals in data positions must not shimmy as values change, and columns of
+   figures should align on the digit. */
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/**
+ * Skip layout and paint for sections still off screen.
+ *
+ * Safe here ONLY because reveals are scroll-driven CSS with no
+ * IntersectionObserver. An observer never fires for elements inside a skipped
+ * subtree, which previously stranded them at opacity 0; a view() timeline is
+ * positional, so a section that is skipped and then rendered computes the
+ * correct progress immediately. Do not reintroduce an observer-driven reveal
+ * while this is in place.
+ */
+@utility defer-render {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 700px;
+}
+
+@utility grid-field {
+  background-image: linear-gradient(
+      to right,
+      var(--color-line) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, var(--color-line) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, #000 20%, transparent 78%);
+}
+
+/* ==========================================================================
+   MOTION
+   Reveal is driven by IntersectionObserver toggling [data-visible]; no
+   animation library ships to the client.
+   ========================================================================== */
+
+@layer components {
+  /**
+   * Scroll-driven reveals — no JavaScript.
+   *
+   * FAIL-SAFE BY CONSTRUCTION. The default state of a [data-reveal] block is
+   * fully visible. The hiding only exists INSIDE the @supports block, so a
+   * browser without scroll-driven animations (or with JS disabled, or with
+   * reduced motion) simply shows the content. The previous design was the
+   * opposite — content defaulted to opacity 0 and depended on an observer to
+   * reveal it, which is why a missed event left the page blank.
+   *
+   * WHY NOT IntersectionObserver. An observer is event-based: if the callback
+   * never fires (as happened for every element inside a content-visibility
+   * subtree) the content is stranded invisible. A view() timeline is
+   * positional — progress is derived from scroll offset, so there is no event
+   * to miss and no state to get stuck in.
+   *
+   * --reveal-stagger shifts an element's range so grouped items cascade
+   * rather than landing together.
+   */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      [data-reveal] {
+        animation: cl-reveal linear both;
+        animation-timeline: view();
+        animation-range: entry calc(0% + var(--reveal-stagger, 0%))
+          entry calc(58% + var(--reveal-stagger, 0%));
+      }
+
+      [data-reveal="clip"] {
+        animation-name: cl-reveal-clip;
+      }
+    }
+  }
+}
+
+@keyframes cl-reveal {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cl-reveal-clip {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/**
+ * Spotlight border.
+ *
+ * The panel's own 1px edge illuminates under the cursor. Drawn as a masked
+ * pseudo-element so only the border lights — a filled radial glow behind the
+ * panel would wash the content and read as a generic "glow card".
+ *
+ * `SpotlightRoot` feeds --spot-x/--spot-y from one delegated listener; with no
+ * JS the gradient simply centres and the hover still reads as a soft edge.
+ */
+@layer components {
+  .spotlight {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .spotlight::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    border-radius: inherit;
+    padding: 1px;
+    background: radial-gradient(
+      18rem circle at var(--spot-x, 50%) var(--spot-y, 0%),
+      rgb(255 91 40 / 0.55),
+      rgb(255 91 40 / 0.08) 45%,
+      transparent 70%
+    );
+    /* Punch out the interior so only the 1px ring survives. */
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity var(--duration-slow) var(--ease-out-soft);
+    pointer-events: none;
+  }
+
+  .spotlight:hover::before,
+  .spotlight:focus-within::before {
+    opacity: 1;
+  }
+}
+
+/**
+ * Custom cursor.
+ *
+ * Built from the site's own marks: the logo's square bracket, the ember dot,
+ * and the corner-tick motif from the service and blueprint panels. See
+ * CustomCursor.tsx for the motion half.
+ *
+ * Structure matters here: JS owns `transform` on .cursor-ring / .cursor-dot
+ * (position only), and every state change animates an INNER element or a
+ * non-transform property. Nothing else may write transform on those two
+ * elements, or the per-frame position update and the state transition would
+ * fight and the cursor would stutter.
+ *
+ * The system cursor is hidden only once `.has-custom-cursor` lands on <html>,
+ * which only happens after a real pointermove — so keyboard-only visits and
+ * no-JS both keep the native cursor.
+ */
+@layer components {
+  html.has-custom-cursor,
+  html.has-custom-cursor * {
+    cursor: none !important;
+  }
+
+  .cursor-layer {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-cursor);
+    pointer-events: none;
+  }
+
+  .cursor-ring,
+  .cursor-dot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    /* JS writes transform every frame; keep it off the transition list. */
+    transition: opacity var(--duration-base) var(--ease-out-soft);
+    will-change: transform;
+  }
+
+  .cursor-ring[data-on],
+  .cursor-dot[data-on] {
+    opacity: 1;
+  }
+
+  /* --- dot: tracks the pointer exactly ---------------------------------- */
+  .cursor-dot {
+    width: 7px;
+    height: 7px;
+    margin: -3.5px 0 0 -3.5px;
+    border-radius: 999px;
+    background: var(--color-ember);
+    /* Small bloom so a 7px mark still reads over busy panels and imagery. */
+    box-shadow: 0 0 10px 1px rgb(255 91 40 / 0.55);
+  }
+
+  /* --- ring: trails the dot --------------------------------------------- */
+  .cursor-ring {
+    width: 36px;
+    height: 36px;
+    margin: -18px 0 0 -18px;
+  }
+
+  /* The visible bracket is an inner box, so it can scale and rotate freely
+     without touching the ring's JS-driven translate. */
+  .cursor-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgb(255 91 40 / 0.75);
+    border-radius: var(--radius-xs);
+    transition:
+      transform var(--duration-base) var(--ease-out-quart),
+      opacity var(--duration-base) var(--ease-out-quart),
+      border-color var(--duration-base) var(--ease-out-quart);
+  }
+
+  /* --- interactive: bracket opens into corner ticks and rotates ---------- */
+  .cursor-ring[data-variant="link"]::before {
+    opacity: 0;
+    transform: scale(1.5) rotate(45deg);
+  }
+
+  .cursor-tick {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    color: var(--color-ember);
+    opacity: 0;
+    transition:
+      opacity var(--duration-base) var(--ease-out-quart),
+      transform var(--duration-base) var(--ease-out-quart);
+  }
+  .cursor-tick-tl {
+    top: 0;
+    left: 0;
+    border-left: 1.5px solid currentColor;
+    border-top: 1.5px solid currentColor;
+    transform: translate(6px, 6px);
+  }
+  .cursor-tick-tr {
+    top: 0;
+    right: 0;
+    border-right: 1.5px solid currentColor;
+    border-top: 1.5px solid currentColor;
+    transform: translate(-6px, 6px);
+  }
+  .cursor-tick-br {
+    bottom: 0;
+    right: 0;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: translate(-6px, -6px);
+  }
+  .cursor-tick-bl {
+    bottom: 0;
+    left: 0;
+    border-left: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: translate(6px, -6px);
+  }
+
+  /* Ticks fly out to the corners and hold — the reticle "locks on". */
+  .cursor-ring[data-variant="link"] .cursor-tick {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+
+  .cursor-ring[data-variant="link"] ~ .cursor-dot {
+    width: 4px;
+    height: 4px;
+    margin: -2px 0 0 -2px;
+    box-shadow: 0 0 8px 1px rgb(255 91 40 / 0.5);
+  }
+
+  /* --- adaptive contrast ------------------------------------------------
+     Set by CustomCursor when ember would not stand out against the surface
+     underneath (most visibly: the ember-filled primary CTA). */
+  .cursor-ring[data-contrast="ink"]::before { border-color: rgb(8 9 10 / 0.9); }
+  .cursor-ring[data-contrast="ink"] .cursor-tick { color: var(--color-ink); }
+  .cursor-ring[data-contrast="ink"] ~ .cursor-dot {
+    background: var(--color-ink);
+    box-shadow: 0 0 10px 1px rgb(8 9 10 / 0.5);
+  }
+
+  .cursor-ring[data-contrast="paper"]::before { border-color: rgb(242 241 236 / 0.9); }
+  .cursor-ring[data-contrast="paper"] .cursor-tick { color: var(--color-paper); }
+  .cursor-ring[data-contrast="paper"] ~ .cursor-dot {
+    background: var(--color-paper);
+    box-shadow: 0 0 10px 1px rgb(242 241 236 / 0.5);
+  }
+
+  .cursor-ring[data-contrast="ink"][data-variant="text"]::before { background: var(--color-ink); }
+  .cursor-ring[data-contrast="paper"][data-variant="text"]::before { background: var(--color-paper); }
+
+  /* --- press: reticle tightens ------------------------------------------ */
+  .cursor-ring[data-active]::before {
+    transform: scale(0.82);
+    border-color: rgb(255 91 40 / 0.95);
+  }
+  .cursor-ring[data-active][data-variant="link"]::before {
+    transform: scale(1.5) rotate(45deg);
+  }
+  .cursor-ring[data-active] .cursor-tick {
+    transform: translate(0, 0) scale(0.8);
+  }
+
+  /* --- text field: bracket becomes an I-beam ---------------------------- */
+  .cursor-ring[data-variant="text"]::before {
+    inset: -2px auto -2px 50%;
+    width: 2px;
+    border: 0;
+    border-radius: 1px;
+    background: var(--color-ember);
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+  .cursor-ring[data-variant="text"] .cursor-tick {
+    opacity: 0;
+  }
+  .cursor-ring[data-variant="text"] ~ .cursor-dot {
+    opacity: 0;
+  }
+}
+
+/* Never render for touch or reduced-motion visitors — belt and braces
+   alongside the matchMedia guard in CustomCursor.tsx. */
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .cursor-layer {
+    display: none;
+  }
+  html.has-custom-cursor,
+  html.has-custom-cursor * {
+    cursor: auto !important;
+  }
+}
+
+
+@keyframes cl-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes cl-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes cl-trace {
+  from {
+    stroke-dashoffset: var(--trace-length, 100);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes cl-fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes cl-caret {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  95% {
+    opacity: 0;
+  }
+}
+
+/* ==========================================================================
+   REDUCED MOTION
+   Everything animated resolves to its end state instantly. Canvas and SVG
+   systems check the same query in JS and render a single static frame.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+}
+
+/* Respect users who ask for more contrast. Overriding the custom properties
+   on :root re-points every utility that resolves them. */
+@media (prefers-contrast: more) {
+  :root {
+    --color-mute: #b8bdc5;
+    --color-mute-deep: #939aa3;
+    --color-line: rgb(242 241 236 / 0.24);
+    --color-line-strong: rgb(242 241 236 / 0.42);
+  }
+}
