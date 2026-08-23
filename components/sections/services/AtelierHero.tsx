@@ -1,5 +1,6 @@
 import { services } from "@/content/services";
 import { TextReveal } from "@/components/motion/TextReveal";
+import { HeroMark } from "@/components/sections/services/HeroMark";
 
 /**
  * SERVICES HERO - atelier world, luxury register.
@@ -50,7 +51,16 @@ export function AtelierHero() {
 
         <hr className="editorial-rule mt-6" />
 
-        <div className="mt-16 grid gap-x-(--space-gutter) gap-y-14 lg:grid-cols-12 lg:items-end">
+        {/* The dominant editorial mark: "SERVICES" printed into place via a
+            masked clip-path reveal on load - see HeroMark for why this is a
+            Motion, mount-triggered animation rather than the scroll-driven
+            <TextReveal> the H1 below still uses (this sits above the fold,
+            so "on load" and "on scroll into view" are the same moment, but
+            the clip-path treatment specifically needs a value Motion
+            animates, which CSS view-timelines don't reach). */}
+        <HeroMark />
+
+        <div className="mt-10 grid gap-x-(--space-gutter) gap-y-14 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-7">
             <h1
               id="services-heading"

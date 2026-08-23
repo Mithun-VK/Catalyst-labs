@@ -1,0 +1,523 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "Catalyst Labs - home" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e9]:
+          - generic [ref=e10]: Catalyst Labs
+          - generic [ref=e11]: Software · AI · Automation
+      - navigation "Primary" [ref=e12]:
+        - list [ref=e13]:
+          - listitem [ref=e14]:
+            - link "Works" [ref=e15] [cursor=pointer]:
+              - /url: /work
+          - listitem [ref=e17]:
+            - link "Services" [ref=e18] [cursor=pointer]:
+              - /url: /services
+          - listitem [ref=e19]:
+            - link "AI & Automation" [ref=e20] [cursor=pointer]:
+              - /url: /ai
+              - text: AI
+          - listitem [ref=e21]:
+            - link "Process" [ref=e22] [cursor=pointer]:
+              - /url: /process
+          - listitem [ref=e23]:
+            - link "About" [ref=e24] [cursor=pointer]:
+              - /url: /about
+      - generic [ref=e25]:
+        - paragraph [ref=e26]: Poster
+        - link "Start a Project" [ref=e28] [cursor=pointer]:
+          - /url: /contact
+  - main [ref=e29]:
+    - generic [ref=e31]:
+      - region [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - paragraph [ref=e35]: Works
+            - paragraph [ref=e36]: 14 projects · 4 live sites
+          - heading "We build things that move." [level=1] [ref=e37]:
+            - generic [ref=e38]:
+              - generic [ref=e39]:
+                - generic [ref=e40]: We
+                - generic [ref=e41]: build
+              - generic [ref=e42]: things
+              - generic [ref=e44]:
+                - generic [ref=e45]: that
+                - generic [ref=e46]: move.
+        - generic [ref=e48]:
+          - generic [ref=e49]:
+            - generic [ref=e50]: SHIPPED · IN PRODUCTION · MEASURED ·
+            - generic [ref=e51]: SHIPPED · IN PRODUCTION · MEASURED ·
+            - generic [ref=e52]: SHIPPED · IN PRODUCTION · MEASURED ·
+            - generic [ref=e53]: SHIPPED · IN PRODUCTION · MEASURED ·
+          - generic [ref=e54]:
+            - generic [ref=e55]: SHIPPED · IN PRODUCTION · MEASURED ·
+            - generic [ref=e56]: SHIPPED · IN PRODUCTION · MEASURED ·
+            - generic [ref=e57]: SHIPPED · IN PRODUCTION · MEASURED ·
+            - generic [ref=e58]: SHIPPED · IN PRODUCTION · MEASURED ·
+        - generic [ref=e60]:
+          - paragraph [ref=e61]: Fraud scoring in production. A quantitative trading stack. A tax compliance platform. Three live client sites.
+          - paragraph [ref=e62]: Every entry below is real and shipped. The numbers are recorded results from the build, never estimates - and where an engagement is covered by an agreement, it is described without naming the client rather than dressed up.
+      - region [ref=e64]:
+        - heading "Selected projects" [level=2] [ref=e65]
+        - generic [ref=e66]:
+          - navigation:
+            - list:
+              - listitem: "01"
+              - listitem: "02"
+              - listitem: "03"
+              - listitem: "04"
+              - listitem: "05"
+              - listitem: "06"
+          - article [ref=e67]:
+            - generic [ref=e87]:
+              - paragraph [ref=e88]:
+                - generic [ref=e89]: "01"
+                - generic [ref=e91]: Payments risk
+                - generic [ref=e93]: Production · 2026
+              - generic [ref=e94]:
+                - generic: SafeMerchant
+                - heading "SafeMerchant" [level=3] [ref=e95]
+              - paragraph [ref=e96]: A fraud scoring API for UPI merchant onboarding, serving live model inference from Mumbai.
+              - list [ref=e97]:
+                - listitem [ref=e98]:
+                  - generic [ref=e100]: ROC AUC 0.908 on held-out evaluation
+                - listitem [ref=e101]:
+                  - generic [ref=e103]: ONNX runtime inference, no Python dependency at serve time
+                - listitem [ref=e104]:
+                  - generic [ref=e106]: Deployed on AWS EC2, ap-south-1 (Mumbai)
+                - listitem [ref=e107]:
+                  - generic [ref=e109]: Full test suite passing
+              - list [ref=e110]:
+                - listitem [ref=e111]: Python
+                - listitem [ref=e112]: ONNX
+                - listitem [ref=e113]: FastAPI
+                - listitem [ref=e114]: AWS EC2
+                - listitem [ref=e115]: PostgreSQL
+            - generic:
+              - generic:
+                - generic:
+                  - generic: Python
+                  - generic: ONNX
+                  - generic: FastAPI
+                  - generic: AWS EC2
+            - generic:
+              - generic: Built.
+              - generic: Tested.
+              - generic: Deployed.
+              - generic: Production.
+          - article [ref=e116]:
+            - generic [ref=e117]:
+              - generic [ref=e118]:
+                - generic [ref=e123]:
+                  - generic [ref=e124]: arkangel.co.in
+                  - img "Ark Angel homepage" [ref=e131]
+                - generic [ref=e132]: Live
+              - generic [ref=e134]:
+                - paragraph [ref=e135]:
+                  - generic [ref=e136]: "02"
+                  - generic [ref=e138]: Quantitative trading
+                  - generic [ref=e140]: Production · 2026
+                - generic [ref=e141]:
+                  - generic: Ark Angel
+                  - heading "Ark Angel" [level=3] [ref=e142]
+                - paragraph [ref=e143]: A statistical arbitrage research and execution stack, from signal research through to order routing.
+                - list [ref=e144]:
+                  - listitem [ref=e145]:
+                    - generic [ref=e147]: 102 automated tests passing
+                  - listitem [ref=e148]:
+                    - generic [ref=e150]: Two strategies validated through the promotion gate
+                  - listitem [ref=e151]:
+                    - generic [ref=e153]: Backtests model transaction cost and slippage explicitly
+                - list [ref=e154]:
+                  - listitem [ref=e155]: Python
+                  - listitem [ref=e156]: pandas
+                  - listitem [ref=e157]: NumPy
+                  - listitem [ref=e158]: PostgreSQL
+                  - listitem [ref=e159]: Backtesting
+                - link "Visit arkangel.co.in" [ref=e162] [cursor=pointer]:
+                  - /url: https://arkangel.co.in
+                  - text: Visit arkangel.co.in
+                  - generic [ref=e163]: ↗
+            - generic:
+              - generic:
+                - generic:
+                  - generic: Python
+                  - generic: pandas
+                  - generic: NumPy
+                  - generic: PostgreSQL
+            - generic:
+              - generic: Built.
+              - generic: Tested.
+              - generic: Deployed.
+              - generic: Live.
+          - article [ref=e164]:
+            - generic [ref=e181]:
+              - paragraph [ref=e182]:
+                - generic [ref=e183]: "03"
+                - generic [ref=e185]: Financial compliance
+                - generic [ref=e187]: Production · 2026
+              - generic [ref=e188]:
+                - generic: TaxVault v3
+                - heading "TaxVault v3" [level=3] [ref=e189]
+              - paragraph [ref=e190]: The core platform for a tax and compliance product - schema, data layer and domain logic.
+              - list [ref=e191]:
+                - listitem [ref=e192]:
+                  - generic [ref=e194]: 289 automated tests passing
+                - listitem [ref=e195]:
+                  - generic [ref=e197]: Versioned migrations with deterministic seed data
+                - listitem [ref=e198]:
+                  - generic [ref=e200]: Reviewed through a full production cycle
+              - list [ref=e201]:
+                - listitem [ref=e202]: TypeScript
+                - listitem [ref=e203]: Node.js
+                - listitem [ref=e204]: PostgreSQL
+                - listitem [ref=e205]: Prisma
+            - generic:
+              - generic:
+                - generic:
+                  - generic: TypeScript
+                  - generic: Node.js
+                  - generic: PostgreSQL
+                  - generic: Prisma
+            - generic:
+              - generic: Built.
+              - generic: Tested.
+              - generic: Deployed.
+              - generic: Production.
+          - article [ref=e206]:
+            - generic [ref=e207]:
+              - generic [ref=e208]:
+                - generic [ref=e213]:
+                  - generic [ref=e214]: fashionprofiles.in
+                  - img "TAIG Fashion Profiles homepage" [ref=e221]
+                - generic [ref=e222]: Live
+              - generic [ref=e224]:
+                - paragraph [ref=e225]:
+                  - generic [ref=e226]: "04"
+                  - generic [ref=e228]: Apparel sourcing
+                  - generic [ref=e230]: Live · 2026
+                - generic [ref=e231]:
+                  - generic: TAIG Fashion Profiles
+                  - heading "TAIG Fashion Profiles" [level=3] [ref=e232]
+                - paragraph [ref=e233]: A B2B site for an apparel sourcing and buying house, built to convert overseas buyer enquiries.
+                - list [ref=e234]:
+                  - listitem [ref=e235]:
+                    - generic [ref=e237]: Live in production
+                  - listitem [ref=e238]:
+                    - generic [ref=e240]: Structured for B2B buyer enquiry capture
+                - list [ref=e241]:
+                  - listitem [ref=e242]: Next.js
+                  - listitem [ref=e243]: TypeScript
+                  - listitem [ref=e244]: Tailwind CSS
+                  - listitem [ref=e245]: Vercel
+                - link "Visit fashionprofiles.in" [ref=e248] [cursor=pointer]:
+                  - /url: https://fashionprofiles.in
+                  - text: Visit fashionprofiles.in
+                  - generic [ref=e249]: ↗
+            - generic:
+              - generic:
+                - generic:
+                  - generic: Next.js
+                  - generic: TypeScript
+                  - generic: Tailwind CSS
+                  - generic: Vercel
+            - generic:
+              - generic: Built.
+              - generic: Tested.
+              - generic: Deployed.
+              - generic: Live.
+          - article [ref=e250]:
+            - generic [ref=e251]:
+              - generic [ref=e252]:
+                - generic [ref=e257]:
+                  - generic [ref=e258]: attramevtech.com
+                  - img "Attram Technologies homepage" [ref=e265]
+                - generic [ref=e266]: Live
+              - generic [ref=e268]:
+                - paragraph [ref=e269]:
+                  - generic [ref=e270]: "05"
+                  - generic [ref=e272]: EV infrastructure
+                  - generic [ref=e274]: Live · 2026
+                - generic [ref=e275]:
+                  - generic: Attram Technologies
+                  - heading "Attram Technologies" [level=3] [ref=e276]
+                - paragraph [ref=e277]: The marketing site for an EV charging installation company operating across South India.
+                - list [ref=e278]:
+                  - listitem [ref=e279]:
+                    - generic [ref=e281]: Live in production
+                  - listitem [ref=e282]:
+                    - generic [ref=e284]: Built for regional search visibility
+                - list [ref=e285]:
+                  - listitem [ref=e286]: Next.js
+                  - listitem [ref=e287]: TypeScript
+                  - listitem [ref=e288]: Tailwind CSS
+                  - listitem [ref=e289]: Vercel
+                - link "Visit attramevtech.com" [ref=e292] [cursor=pointer]:
+                  - /url: https://attramevtech.com
+                  - text: Visit attramevtech.com
+                  - generic [ref=e293]: ↗
+            - generic:
+              - generic:
+                - generic:
+                  - generic: Next.js
+                  - generic: TypeScript
+                  - generic: Tailwind CSS
+                  - generic: Vercel
+            - generic:
+              - generic: Built.
+              - generic: Tested.
+              - generic: Deployed.
+              - generic: Live.
+          - article [ref=e294]:
+            - generic [ref=e295]:
+              - generic [ref=e296]:
+                - generic [ref=e301]:
+                  - generic [ref=e302]: quinelements.com
+                  - img "Quin Elements homepage" [ref=e309]
+                - generic [ref=e310]: Live
+              - generic [ref=e312]:
+                - paragraph [ref=e313]:
+                  - generic [ref=e314]: "06"
+                  - generic [ref=e316]: EV infrastructure
+                  - generic [ref=e318]: Live · 2026
+                - generic [ref=e319]:
+                  - generic: Quin Elements
+                  - heading "Quin Elements" [level=3] [ref=e320]
+                - paragraph [ref=e321]: A site for an EV charging installer and white-label OEM charger supplier.
+                - list [ref=e322]:
+                  - listitem [ref=e323]:
+                    - generic [ref=e325]: Live in production
+                  - listitem [ref=e326]:
+                    - generic [ref=e328]: "Dual audience: installation and OEM supply"
+                - list [ref=e329]:
+                  - listitem [ref=e330]: Next.js
+                  - listitem [ref=e331]: TypeScript
+                  - listitem [ref=e332]: Tailwind CSS
+                  - listitem [ref=e333]: Vercel
+                - link "Visit quinelements.com" [ref=e336] [cursor=pointer]:
+                  - /url: https://quinelements.com
+                  - text: Visit quinelements.com
+                  - generic [ref=e337]: ↗
+            - generic:
+              - generic:
+                - generic:
+                  - generic: Next.js
+                  - generic: TypeScript
+                  - generic: Tailwind CSS
+                  - generic: Vercel
+            - generic:
+              - generic: Built.
+              - generic: Tested.
+              - generic: Deployed.
+              - generic: Live.
+      - region [ref=e338]:
+        - generic [ref=e339]:
+          - generic [ref=e340]:
+            - heading "Also built" [level=2] [ref=e341]
+            - paragraph [ref=e342]: 8 projects · always room for one more
+          - generic [ref=e343]:
+            - article [ref=e344]:
+              - paragraph [ref=e345]:
+                - generic [ref=e346]: Cryptography
+                - generic [ref=e347]: Production
+              - heading "Project Dynamo" [level=3] [ref=e348]
+              - paragraph [ref=e349]: A cryptographic implementation validated against a reference oracle.
+              - list [ref=e350]:
+                - listitem [ref=e351]: Validated 15/15 against the reference oracle
+              - list [ref=e353]:
+                - listitem [ref=e354]: Python
+                - listitem [ref=e355]: Cryptography
+            - article [ref=e356]:
+              - paragraph [ref=e357]:
+                - generic [ref=e358]: Delivery tooling
+                - generic [ref=e359]: Production
+              - heading "Client Documentation System" [level=3] [ref=e360]
+              - paragraph [ref=e361]: The document system behind every Catalyst Labs engagement - scopes, contracts and compliance.
+              - list [ref=e362]:
+                - listitem [ref=e363]: 12 templates across 16 documents
+                - listitem [ref=e365]: Compliance frameworks built in
+              - list [ref=e367]:
+                - listitem [ref=e368]: Documentation
+                - listitem [ref=e369]: Compliance
+            - article [ref=e370]:
+              - paragraph [ref=e371]:
+                - generic [ref=e372]: Quantitative research
+                - generic [ref=e373]: In development
+              - heading "ASRE" [level=3] [ref=e374]
+              - paragraph [ref=e375]: A market regime research engine, delivered across a structured sprint roadmap.
+              - list [ref=e376]:
+                - listitem [ref=e377]: Six sprints delivered
+                - listitem [ref=e379]: Validation-gated phase progression
+              - list [ref=e381]:
+                - listitem [ref=e382]: Python
+                - listitem [ref=e383]: pandas
+                - listitem [ref=e384]: Machine learning
+            - article [ref=e385]:
+              - paragraph [ref=e386]:
+                - generic [ref=e387]: Data platform
+                - generic [ref=e388]: In development
+              - heading "Datasense" [level=3] [ref=e389]
+              - paragraph [ref=e390]: A data platform with subscription billing and analytics.
+              - list [ref=e391]:
+                - listitem [ref=e392]: Core platform built
+                - listitem [ref=e394]: Payment integration in progress
+              - list [ref=e396]:
+                - listitem [ref=e397]: TypeScript
+                - listitem [ref=e398]: Next.js
+                - listitem [ref=e399]: PostgreSQL
+                - listitem [ref=e400]: Razorpay
+            - article [ref=e401]:
+              - paragraph [ref=e402]:
+                - generic [ref=e403]: Security tooling
+                - generic [ref=e404]: In development
+              - heading "SentryLayer" [level=3] [ref=e405]
+              - paragraph [ref=e406]: A security layer product, in active development.
+              - list [ref=e407]:
+                - listitem [ref=e408]: Core capability built
+                - listitem [ref=e410]: In internal testing
+              - list [ref=e412]:
+                - listitem [ref=e413]: TypeScript
+                - listitem [ref=e414]: Node.js
+            - article [ref=e415]:
+              - paragraph [ref=e416]:
+                - generic [ref=e417]: Public sector
+                - generic [ref=e418]: In development
+              - heading "CNI Public Website" [level=3] [ref=e419]
+              - paragraph [ref=e420]: A bilingual public-facing website, English and Tamil.
+              - list [ref=e421]:
+                - listitem [ref=e422]: "Bilingual: English and Tamil"
+                - listitem [ref=e424]: Native-speaker content review
+              - list [ref=e426]:
+                - listitem [ref=e427]: Next.js
+                - listitem [ref=e428]: TypeScript
+                - listitem [ref=e429]: i18n
+            - article [ref=e430]:
+              - paragraph [ref=e431]:
+                - generic [ref=e432]: EV infrastructure
+                - generic [ref=e433]: In development
+              - heading "Attram Charging Platform" [level=3] [ref=e434]
+              - paragraph [ref=e435]: A charge point management platform for EV charging infrastructure.
+              - list [ref=e436]:
+                - listitem [ref=e437]: Platform architecture defined
+              - list [ref=e439]:
+                - listitem [ref=e440]: TypeScript
+                - listitem [ref=e441]: Embedded
+                - listitem [ref=e442]: OCPP
+            - article [ref=e443]:
+              - paragraph [ref=e444]:
+                - generic [ref=e445]: Quantitative research
+                - generic [ref=e446]: Concluded
+              - heading "Crypto Arbitrage Research" [level=3] [ref=e447]
+              - paragraph [ref=e448]: A cross-exchange arbitrage venture, measured properly and then closed.
+              - list [ref=e449]:
+                - listitem [ref=e450]: Closed on measured evidence, not sunk cost
+              - list [ref=e452]:
+                - listitem [ref=e453]: Python
+                - listitem [ref=e454]: Exchange APIs
+            - link "Add your works here Propose a project. Once it ships and you approve publishing it, it goes on this list. Start a conversation" [ref=e456] [cursor=pointer]:
+              - /url: /contact
+              - generic [ref=e457]: +
+              - generic [ref=e458]: Add your works here
+              - generic [ref=e459]: Propose a project. Once it ships and you approve publishing it, it goes on this list.
+              - generic [ref=e460]:
+                - text: Start a conversation
+                - generic [ref=e461]: →
+      - region [ref=e462]:
+        - generic [ref=e464]:
+          - generic [ref=e465]:
+            - heading "Want one of these against your process? Not a generic one." [level=2] [ref=e467]
+            - paragraph [ref=e469]: Every build starts by mapping how the work actually moves through your business. The architecture follows from that, not from a template.
+            - generic [ref=e471]:
+              - link "Start a Project" [ref=e472] [cursor=pointer]:
+                - /url: /contact
+              - link "Message on WhatsApp" [ref=e475] [cursor=pointer]:
+                - /url: https://wa.me/919677080327?text=Hi%20Catalyst%20Labs%20-%20I'd%20like%20to%20discuss%20a%20project.
+          - generic [ref=e477]:
+            - generic [ref=e478]:
+              - generic [ref=e479]: Email
+              - generic [ref=e480]: mithun@catalystlabs.co.in
+            - generic [ref=e481]:
+              - generic [ref=e482]: Phone
+              - generic [ref=e483]: +91 96770 80327
+            - generic [ref=e484]:
+              - generic [ref=e485]: Based in
+              - generic [ref=e486]: Chennai, India
+            - generic [ref=e487]:
+              - generic [ref=e488]: Hours
+              - generic [ref=e489]: Mon–Sat · IST (UTC+5:30)
+  - contentinfo [ref=e490]:
+    - generic [ref=e491]:
+      - generic [ref=e492]:
+        - generic [ref=e494]:
+          - generic [ref=e495]: Catalyst Labs
+          - paragraph [ref=e500]: A software and AI engineering studio in Chennai. We build the systems businesses run on - and the automation that keeps people out of the parts a machine should handle.
+          - paragraph [ref=e501]: Build what matters. Automate what doesn’t.
+        - generic [ref=e502]:
+          - generic [ref=e503]:
+            - heading "Navigate" [level=2] [ref=e504]
+            - list [ref=e505]:
+              - listitem [ref=e506]:
+                - link "Works" [ref=e507] [cursor=pointer]:
+                  - /url: /work
+              - listitem [ref=e508]:
+                - link "Services" [ref=e509] [cursor=pointer]:
+                  - /url: /services
+              - listitem [ref=e510]:
+                - link "AI & Automation" [ref=e511] [cursor=pointer]:
+                  - /url: /ai
+              - listitem [ref=e512]:
+                - link "Process" [ref=e513] [cursor=pointer]:
+                  - /url: /process
+              - listitem [ref=e514]:
+                - link "About" [ref=e515] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e516]:
+                - link "Contact" [ref=e517] [cursor=pointer]:
+                  - /url: /contact
+          - generic [ref=e518]:
+            - heading "Services" [level=2] [ref=e519]
+            - list [ref=e520]:
+              - listitem [ref=e521]:
+                - link "AI & Automation" [ref=e522] [cursor=pointer]:
+                  - /url: /services/ai-automation
+              - listitem [ref=e523]:
+                - link "Custom Software" [ref=e524] [cursor=pointer]:
+                  - /url: /services/custom-software
+              - listitem [ref=e525]:
+                - link "Web Applications" [ref=e526] [cursor=pointer]:
+                  - /url: /services/web
+              - listitem [ref=e527]:
+                - link "Mobile Applications" [ref=e528] [cursor=pointer]:
+                  - /url: /services/mobile
+              - listitem [ref=e529]:
+                - link "SaaS & MVP Development" [ref=e530] [cursor=pointer]:
+                  - /url: /services/saas-mvp
+              - listitem [ref=e531]:
+                - link "Data & Integrations" [ref=e532] [cursor=pointer]:
+                  - /url: /services/data-integrations
+          - generic [ref=e533]:
+            - heading "Contact" [level=2] [ref=e534]
+            - list [ref=e535]:
+              - listitem [ref=e536]:
+                - link "WhatsApp" [ref=e537] [cursor=pointer]:
+                  - /url: https://wa.me/919677080327?text=Hi%20Catalyst%20Labs%20-%20I'd%20like%20to%20discuss%20a%20project.
+              - listitem [ref=e538]:
+                - link "mithun@catalystlabs.co.in" [ref=e539] [cursor=pointer]:
+                  - /url: mailto:mithun@catalystlabs.co.in
+              - listitem [ref=e540]:
+                - link "+91 96770 80327" [ref=e541] [cursor=pointer]:
+                  - /url: tel:+919677080327
+      - generic [ref=e542]:
+        - generic [ref=e543]:
+          - paragraph [ref=e544]: © 2026 Catalyst Labs. All rights reserved.
+          - paragraph [ref=e545]: UDYAM-TN-02-0462988
+        - navigation "Legal" [ref=e546]:
+          - link "Privacy" [ref=e547] [cursor=pointer]:
+            - /url: /privacy
+          - link "Terms" [ref=e548] [cursor=pointer]:
+            - /url: /terms
+          - link "Back to top" [ref=e549] [cursor=pointer]:
+            - /url: "#top"

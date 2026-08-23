@@ -81,11 +81,15 @@ export function WorksShowcase({ projects }: { projects: Project[] }) {
           trigger: section,
           start: "top top",
           // More scroll distance per project than it first reads as too little
-          // (2.2x viewport height): the same physical scroll gesture now
+          // (2.6x viewport height): the same physical scroll gesture now
           // covers less of the total reveal, which is what actually reads as
           // "smoother" - scrub alone can't fix a track that's simply too
-          // short for how much is happening on it.
-          end: () => "+=" + panels.length * window.innerHeight * 2.2,
+          // short for how much is happening on it. The exit sequence
+          // (content clears -> blueprint pulse -> four impact words, each
+          // strictly non-overlapping - see applyExit) is what benefits most:
+          // it now gets a genuinely unhurried scroll distance per word
+          // instead of flashing past in a fraction of a normal scroll tick.
+          end: () => "+=" + panels.length * window.innerHeight * 2.6,
           pin,
           // A number, not `true`: the animation state chases the scroll
           // position with this many seconds of catch-up easing instead of
@@ -208,12 +212,21 @@ function buildPanelRefs(root: HTMLElement): PanelRefs {
 const ENTER_END = 0.12;
 /**
  * Local progress where the hold ends and the exit/impact sequence begins.
- * Combined with the wider per-project scroll track above, this gives the
- * hold roughly 2.5x the scroll distance it had before - the metrics, tech
- * stack and CTA now sit fully settled and readable for a real stretch of
- * scrolling instead of arriving just in time to compress away again.
+ * Metrics, tech stack and CTA sit fully settled and readable for the bulk of
+ * the segment before anything starts moving again.
  */
-const EXIT_START = 0.8;
+const EXIT_START = 0.72;
+/**
+ * Where, WITHIN the exit window (x, 0-1), the content has fully compressed
+ * and faded - and where the impact-word sequence is allowed to start. These
+ * are deliberately non-overlapping: content must be fully gone (opacity 0)
+ * before the first word is allowed to appear. They used to share the same
+ * 0-1 range, so a word like "TESTED." rendered on top of description text
+ * and tech pills that were only half faded - readable as visual noise, not
+ * a clean transition.
+ */
+const CONTENT_CLEAR = 0.22;
+const WORDS_START = 0.3;
 
 function clamp01(n: number): number {
   return Math.max(0, Math.min(1, n));
@@ -361,41 +374,58 @@ function applyVisual(p: PanelRefs, e: number) {
 
 /**
  * x: 0 = holding, 1 = fully compressed and handed off to the next project.
+ *
+ * Strictly sequential, not simultaneous: the content compresses and fades
+ * COMPLETELY (through CONTENT_CLEAR) before the blueprint pulse plays, and
+ * the blueprint is completely gone before the first impact word is allowed
+ * to appear (WORDS_START). Each stage owns its own slice of `x` with no
+ * overlap, so a word like "TESTED." always lands on the clean, settled flood
+ * colour - never on top of half-faded description text and tech pills.
+ *
  * Compresses `contentWrap` only, NOT `p.root` - the impact words and the
  * blueprint overlay are siblings of contentWrap (see ProjectPanel.tsx), so
  * they stay at their own full, independent opacity instead of compounding
- * with a fading ancestor. Without this split, "DEPLOYED." read as a faint
- * grey ghost right when it should be the boldest thing on screen.
+ * with a fading ancestor.
  */
 function applyExit(p: PanelRefs, x: number) {
+  const eContent = easeOut(sub(x, 0, CONTENT_CLEAR));
   if (p.contentWrap)
     gsap.set(p.contentWrap, {
-      scaleY: 1 - 0.9 * x,
-      opacity: 1 - x,
+      scaleY: 1 - 0.92 * eContent,
+      opacity: 1 - eContent,
       transformOrigin: "top center",
     });
 
+  // A brief engineering pulse while the content is compressing away - fully
+  // faded out again before WORDS_START, never sharing the stage with a word.
+  if (p.blueprint) {
+    const bpWindow = sub(x, 0, WORDS_START * 0.85);
+    const bpOp = bpWindow < 0.5 ? bpWindow / 0.5 : 1 - (bpWindow - 0.5) / 0.5;
+    gsap.set(p.blueprint, { opacity: bpOp * 0.85 });
+    if (p.blueprintPath)
+      gsap.set(p.blueprintPath, {
+        strokeDasharray: 1,
+        strokeDashoffset: 1 - sub(x, 0, WORDS_START * 0.7),
+      });
+    p.blueprintLabels.forEach((el, i) => {
+      gsap.set(el, { opacity: sub(x, i * 0.04, i * 0.04 + 0.2) * bpOp });
+    });
+  }
+
+  // The word sequence gets the remainder of the exit window entirely to
+  // itself - a generous, evenly-paced turn each, landing on a clean surface.
   const n = p.impactWords.length;
+  const wx = sub(x, WORDS_START, 1);
   p.impactWords.forEach((el, i) => {
     if (n === 0) return;
     const start = i / n;
     const end = (i + 1) / n;
-    const local = sub(x, start, end);
+    const local = sub(wx, start, end);
     let op: number;
-    if (local <= 0.35) op = local / 0.35;
-    else if (local < 0.65) op = 1;
-    else op = 1 - (local - 0.65) / 0.35;
-    const within = x > start && x < end ? op : 0;
-    gsap.set(el, { opacity: within, scale: 0.92 + 0.08 * Math.min(1, within * 1.3) });
+    if (local <= 0.3) op = local / 0.3;
+    else if (local < 0.72) op = 1;
+    else op = 1 - (local - 0.72) / 0.28;
+    const within = wx > start && wx < end ? op : 0;
+    gsap.set(el, { opacity: within, scale: 0.94 + 0.06 * Math.min(1, within * 1.3) });
   });
-
-  if (p.blueprint) {
-    const bpOp = x < 0.5 ? sub(x, 0.02, 0.32) : 1 - sub(x, 0.65, 1);
-    gsap.set(p.blueprint, { opacity: bpOp * 0.9 });
-    if (p.blueprintPath)
-      gsap.set(p.blueprintPath, { strokeDasharray: 1, strokeDashoffset: 1 - sub(x, 0, 0.6) });
-    p.blueprintLabels.forEach((el, i) => {
-      gsap.set(el, { opacity: sub(x, i * 0.08, i * 0.08 + 0.35) });
-    });
-  }
 }

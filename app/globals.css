@@ -2141,3 +2141,58 @@ body:has([data-world="system"]) {
     transform: rotate(-360deg);
   }
 }
+
+/* ==========================================================================
+   CATALYST SYSTEM MAP
+   --------------------------------------------------------------------------
+   Connecting lines for the Services page's capability map. Scroll-driven
+   via `animation-timeline: view()` - the SAME mechanism the site's
+   `[data-reveal]` system uses (see the long comment on that block) - rather
+   than a second GSAP ScrollTrigger instance. This diagram draws itself in
+   once as the visitor scrolls to it; it does not pin or scrub, so it does
+   not need the tool reserved for that (see ServicesSection.tsx, which does).
+
+   `stroke: currentColor` deliberately, not a named token: the map sits in
+   the atelier world's gold/teal palette, and letting the line inherit
+   whatever colour class wraps it means this same utility would still be
+   correct if reused somewhere with a different accent.
+   ========================================================================== */
+
+@layer components {
+  .trace-path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1;
+    stroke-dashoffset: 0;
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .trace-path[data-run] {
+        stroke-dasharray: var(--trace-length, 100);
+        stroke-dashoffset: var(--trace-length, 100);
+        animation: cl-trace linear both;
+        animation-timeline: view();
+        animation-range: entry calc(15% + var(--trace-stagger, 0%))
+          entry calc(60% + var(--trace-stagger, 0%));
+      }
+    }
+  }
+
+  /* A capability node: a bordered plate that gains its accent border and a
+     lift on hover/focus, matching the site's group-hover convention. */
+  .system-node {
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-ink-raised);
+    transition:
+      border-color var(--duration-slow) var(--ease-out-soft),
+      transform var(--duration-base) var(--ease-out-quart),
+      box-shadow var(--duration-slow) var(--ease-out-soft);
+  }
+  .system-node:hover,
+  .system-node:focus-visible {
+    border-color: var(--color-ember);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-panel);
+  }
+}
