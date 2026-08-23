@@ -1,76 +1,42 @@
 import type { Metadata } from "next";
 import { breadcrumbSchema, buildMetadata } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { PageHeader, MetaList } from "@/components/ui/PageHeader";
-import { Services } from "@/components/sections/Services";
-import { BuildMatrix } from "@/components/sections/BuildMatrix";
+import { World } from "@/components/worlds/World";
+import { AtelierHero } from "@/components/sections/services/AtelierHero";
+import { ServicesSection } from "@/components/sections/services/ServicesSection";
 import { CTABand } from "@/components/sections/CTABand";
-import { ButtonLink } from "@/components/ui/Button";
-import { services } from "@/content/services";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Web Design & Custom Software Services | Catalyst Labs",
+  title: "Software, AI & Automation Services | Catalyst Labs",
   description:
-    "Websites, custom software, mobile apps, AI automation and integrations. Six capabilities, each scoped around the business problem it solves.",
+    "Custom software, AI and automation, web and mobile applications, SaaS builds and data integrations - scoped around how your business actually runs.",
   path: "/services",
 });
 
+/**
+ * SERVICES - the atelier world.
+ *
+ * The only light page on the site. Services is where the reader is closest to
+ * spending money, and the register shifts accordingly: ivory, quiet, slow,
+ * mostly empty. Where Works shouts to be remembered, this page lowers its
+ * voice to be believed.
+ *
+ * The old BuildMatrix table has been dropped from this route. A dense
+ * comparison grid is a decision-support tool, and it fought the sequence
+ * directly above it for the same job - the service detail pages carry that
+ * detail properly, one practice at a time.
+ */
 export default function ServicesPage() {
   return (
-    <>
+    <World id="atelier">
       <JsonLd data={breadcrumbSchema([{ name: "Services", path: "/services" }])} />
-      <PageHeader
-        index="02"
-        eyebrow="Services"
-        crumbs={[{ label: "Home", href: "/" }, { label: "Services" }]}
-        title={
-          <>
-            Six ways we take <span className="accent-word text-ember">work</span>{" "}
-            off your team.
-          </>
-        }
-        lead="Every capability answers the same three questions before a line of code is written: what is broken, what gets built, and what changes once it exists."
-        actions={
-          <>
-            <ButtonLink
-              href="/contact"
-              arrow
-              event="cta_click"
-              eventProps={{ location: "services_header", label: "start_a_project" }}
-              className="w-full sm:w-auto"
-            >
-              Start a Project
-            </ButtonLink>
-            <ButtonLink
-              href="/work"
-              variant="secondary"
-              className="w-full sm:w-auto"
-              event="nav_click"
-              eventProps={{ label: "work", location: "services_header" }}
-            >
-              See how we build
-            </ButtonLink>
-          </>
-        }
-        meta={
-          <MetaList
-            items={[
-              { label: "Capabilities", value: `${services.length} services` },
-              { label: "Engagement", value: "Fixed scope, weekly builds" },
-              { label: "Delivery", value: "Design + engineering in-house" },
-              { label: "Working with", value: "Founders, SMEs, product teams" },
-            ]}
-          />
-        }
-      />
-
-      <Services showHeading={false} />
-      <BuildMatrix />
+      <AtelierHero />
+      <ServicesSection />
       <CTABand
-        title="Not sure which one you need?"
-        accent="Describe the problem."
-        lead="Most projects change shape once we understand the operation. Tell us what is going wrong and we will tell you what it would take to fix - including when the answer is not software."
+        title="Know which of these you need?"
+        accent="Or want help deciding?"
+        lead="Describe the problem in your own words. We will tell you which practice it belongs to, what it would take, and whether it is worth building at all."
       />
-    </>
+    </World>
   );
 }

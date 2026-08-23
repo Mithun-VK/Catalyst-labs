@@ -76,26 +76,36 @@ export function mailtoLink(
 }
 
 /**
- * Primary navigation. Real routes - every entry is its own page.
+ * Primary navigation - every real page on the site.
  *
- * Note: menu numbering is positional (01, 02, 03… down the list). The
- * canonical section numbers used in page headers follow the site's running
- * order instead - Work 01, Services 02, AI 03, Process 04, About 05,
- * Contact 06 - and are set per route.
+ * Home is the logo and Contact is the CTA, so the bar itself carries the five
+ * content routes. AI & Automation and Process are full pages with their own
+ * content and search presence, and hiding them behind other pages meant the
+ * two routes a prospect most often wants to check - "can they actually do AI"
+ * and "how do they work" - were the two hardest to reach.
+ *
+ * The label is shortened to "AI" in the desktop bar only (see Navbar), where
+ * five items plus a logo and a CTA have to share one row at 1024px. The full
+ * name is used everywhere it fits: the mobile menu, the footer, breadcrumbs.
  */
 export const nav = [
+  { label: "Works", href: "/work" },
   { label: "Services", href: "/services" },
-  { label: "Work", href: "/work" },
-  { label: "AI", href: "/ai" },
+  { label: "AI & Automation", href: "/ai" },
   { label: "Process", href: "/process" },
   { label: "About", href: "/about" },
 ] as const;
+
+/** Compact labels for the desktop bar, where horizontal room is the limit. */
+export const navShortLabels: Record<string, string> = {
+  "/ai": "AI",
+};
 
 /** Page titles keyed by route, used for breadcrumbs and the mobile menu. */
 export const routeLabels: Record<string, string> = {
   "/": "Home",
   "/services": "Services",
-  "/work": "Work",
+  "/work": "Works",
   "/ai": "AI & Automation",
   "/process": "Process",
   "/about": "About",

@@ -25,8 +25,16 @@ export function Reveal({
    * where it has already scrolled into view.
    */
   delay?: number;
-  /** "clip" wipes in horizontally - used for rules and headline lines. */
-  variant?: "rise" | "clip";
+  /**
+   * "clip" wipes in horizontally - used for rules and headline lines.
+   * "scale" pops in from 1.06x - a "materialising" entrance, used for
+   * showcase marks (see PosterIndex) rather than running text.
+   * "slide" enters from the left - a smaller lateral nudge than "rise"'s
+   * vertical one, for content that already sits in a horizontal sequence.
+   * "stamp" settles from a slight scale + rotate offset - a physical
+   * deployment-stamp read, used only for the Live pill.
+   */
+  variant?: "rise" | "clip" | "scale" | "slide" | "stamp";
   as?: ElementType;
   className?: string;
 }) {
@@ -34,7 +42,7 @@ export function Reveal({
 
   return (
     <Tag
-      data-reveal={variant === "clip" ? "clip" : ""}
+      data-reveal={variant === "rise" ? "" : variant}
       style={
         stagger
           ? ({ "--reveal-stagger": `${stagger}%` } as React.CSSProperties)

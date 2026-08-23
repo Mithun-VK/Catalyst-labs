@@ -6,6 +6,7 @@ import { Process } from "@/components/sections/Process";
 import { WhyUs } from "@/components/sections/WhyUs";
 import { CTABand } from "@/components/sections/CTABand";
 import { ButtonLink } from "@/components/ui/Button";
+import { World } from "@/components/worlds/World";
 
 export const metadata: Metadata = buildMetadata({
   title: "How We Build: Our 5-Stage Process | Catalyst Labs",
@@ -16,7 +17,7 @@ export const metadata: Metadata = buildMetadata({
 
 export default function ProcessPage() {
   return (
-    <>
+    <World id="atelier">
       <JsonLd data={breadcrumbSchema([{ name: "Process", path: "/process" }])} />
       <PageHeader
         index="04"
@@ -71,6 +72,6 @@ export default function ProcessPage() {
         accent="Discovery."
         lead="The first conversation costs you nothing and usually makes the project smaller and sharper than it started."
       />
-    </>
+    </World>
   );
 }

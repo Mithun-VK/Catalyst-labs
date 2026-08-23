@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { nav } from "@/lib/site";
+import { nav, navShortLabels } from "@/lib/site";
 import { track } from "@/lib/analytics";
 import { Logo } from "@/components/ui/Logo";
 import { MobileMenu } from "./MobileMenu";
+import { worldForPath } from "@/lib/worlds";
 
 /**
  * Sticky navigation.
@@ -15,6 +16,16 @@ import { MobileMenu } from "./MobileMenu";
  * site the current page is a fact, not a guess. Two other pieces of state,
  * both cheap: condensed (past the fold) and read progress on the bottom edge.
  * Scroll work is rAF-coalesced and only touches transform and opacity.
+ *
+ * WORLD-AWARE. The bar takes its colour from tokens alone, so it re-themes
+ * itself on every world without a single conditional - on the ivory Services
+ * page `bg-ink` paints ivory and `text-paper` prints near-black. Only the
+ * TYPOGRAPHY is switched per world, because that is the part tokens cannot
+ * carry: the poster world sets its links in uppercase mono, the atelier world
+ * opens the tracking, the system world reads as instrumentation.
+ *
+ * Structure, order, hit areas and keyboard behaviour never change. The look
+ * adapts; the way it works does not.
  */
 export function Navbar() {
   const pathname = usePathname();
@@ -59,6 +70,19 @@ export function Navbar() {
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
 
+  const world = worldForPath(pathname);
+
+  /* Type treatment per world. Everything else about the link - size, hit
+     area, focus ring, underline - is shared, so only the voice changes. */
+  const linkType =
+    world.id === "poster"
+      ? "font-mono text-[0.8125rem] uppercase tracking-[0.12em]"
+      : world.id === "atelier"
+        ? "text-small tracking-[0.06em]"
+        : world.id === "system"
+          ? "font-mono text-[0.8125rem] tracking-[0.08em]"
+          : "text-small";
+
   return (
     <>
       {/* The scrolled bar sits at 95% rather than a glassier value on purpose:
@@ -85,6 +109,11 @@ export function Navbar() {
             <ul className="flex items-center gap-1">
               {nav.map((item) => {
                 const active = isActive(item.href);
+                /* Five items, a logo and a CTA share one row from 1024px up,
+                   so the desktop bar uses the compact label where one exists.
+                   The accessible name keeps the full route title, so nothing
+                   is lost to a screen reader or to the browser's find. */
+                const short = navShortLabels[item.href];
                 return (
                   <li key={item.href}>
                     <Link
@@ -93,15 +122,17 @@ export function Navbar() {
                         track("nav_click", { label: item.label, device: "desktop" })
                       }
                       aria-current={active ? "page" : undefined}
-                      className={`group relative inline-flex h-11 items-center px-3.5 text-small transition-colors duration-(--duration-base) ${
+                      aria-label={short ? item.label : undefined}
+                      title={short ? item.label : undefined}
+                      className={`group relative inline-flex h-11 items-center px-2.5 transition-colors duration-(--duration-base) xl:px-3.5 ${linkType} ${
                         active ? "text-paper" : "text-mute hover:text-paper"
                       }`}
                     >
-                      {item.label}
+                      {short ?? item.label}
                       {/* Underline: grows from the left on hover, held while active. */}
                       <span
                         aria-hidden="true"
-                        className={`absolute inset-x-3.5 bottom-2.5 h-px origin-left bg-ember transition-transform duration-(--duration-base) ease-(--ease-out-quart) ${
+                        className={`absolute inset-x-2.5 bottom-2.5 h-px origin-left bg-ember transition-transform duration-(--duration-base) ease-(--ease-out-quart) xl:inset-x-3.5 ${
                           active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                         }`}
                       />
@@ -113,6 +144,18 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center gap-2">
+            {/* World readout. The through-line that makes the five
+                environments read as one deliberate system rather than five
+                unrelated pages. Decorative, so it is hidden from assistive
+                tech - the route name is already announced by the link. */}
+            <p
+              aria-hidden="true"
+              className="mr-3 hidden items-center gap-2 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-mute-deep xl:flex"
+            >
+              <span className="h-1 w-1 bg-ember" />
+              {world.label}
+            </p>
+
             <Link
               href="/contact"
               onClick={() =>

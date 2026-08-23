@@ -7,6 +7,13 @@ import { site, whatsappLink } from "@/lib/site";
  * One headline, one primary action, one zero-friction alternative - the same
  * three every time, so the way out is never something a visitor has to look
  * for.
+ *
+ * Built entirely from tokens, so it re-themes itself in every world: on the
+ * ivory Services page the same markup prints dark-on-light with no branch.
+ * The ember radial bloom it used to carry has been removed - it was hardcoded
+ * to a dark ground and read as a stain on ivory, and a large soft glow is the
+ * one visual cliche this site is most careful to avoid. The hairline grid
+ * carries the surface instead.
  */
 export function CTABand({
   title = "Have a problem worth solving?",
@@ -26,16 +33,6 @@ export function CTABand({
         aria-hidden="true"
         className="grid-field pointer-events-none absolute inset-0 -z-10 opacity-60"
       />
-      {/* Gradient stops rather than a blur filter - see the note in Hero. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[28rem] w-[46rem] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-[0.13]"
-        style={{
-          background:
-            "radial-gradient(closest-side, var(--color-ember) 0%, rgb(255 91 40 / 0.55) 34%, rgb(255 91 40 / 0.16) 62%, transparent 100%)",
-        }}
-      />
-
       <div className="container-page">
         <div className="grid gap-x-(--space-gutter) gap-y-10 lg:grid-cols-12">
           <div className="lg:col-span-7">

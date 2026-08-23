@@ -32,6 +32,24 @@ export type Project = {
   /** Public URL, only for sites anyone can visit. */
   href?: string;
   year: string;
+  /** Lifted onto the home page's selected-work index. */
+  featured?: boolean;
+  /**
+   * Poster-world flood colour, matched against the [data-surface] blocks
+   * defined in globals.css. Presentation lives with the project because each
+   * entry on the Works page owns a full-bleed colour field of its own; the
+   * component reads it rather than holding a slug-to-colour map.
+   */
+  accent?: "orange" | "acid" | "pink" | "blue" | "yellow" | "mint";
+  /**
+   * A real screenshot of the live site, under /public/projects. Only set for
+   * projects with a public href - there is no screenshot to show for an API
+   * or a research stack, and a screenshot of a site nobody can visit would
+   * be exactly the kind of unverifiable-looking asset this content file is
+   * built to avoid. Where this is set, the Works page renders it inside a
+   * browser-chrome frame instead of the generated glyph mark.
+   */
+  image?: string;
 };
 
 export const STATUS_LABEL: Record<ProjectStatus, string> = {
@@ -45,6 +63,8 @@ export const STATUS_LABEL: Record<ProjectStatus, string> = {
 export const projects: Project[] = [
   {
     slug: "safemerchant",
+    accent: "orange",
+    featured: true,
     name: "SafeMerchant",
     domain: "Payments risk",
     status: "production",
@@ -63,6 +83,8 @@ export const projects: Project[] = [
   },
   {
     slug: "ark-angel",
+    accent: "acid",
+    featured: true,
     name: "Ark Angel",
     domain: "Quantitative trading",
     status: "production",
@@ -76,10 +98,14 @@ export const projects: Project[] = [
       "Backtests model transaction cost and slippage explicitly",
     ],
     technology: ["Python", "pandas", "NumPy", "PostgreSQL", "Backtesting"],
+    href: "https://arkangel.co.in",
+    image: "/projects/ark-angel.png",
     year: "2026",
   },
   {
     slug: "taxvault",
+    accent: "blue",
+    featured: true,
     name: "TaxVault v3",
     domain: "Financial compliance",
     status: "production",
@@ -97,6 +123,8 @@ export const projects: Project[] = [
   },
   {
     slug: "fashion-profiles",
+    accent: "pink",
+    featured: true,
     name: "TAIG Fashion Profiles",
     domain: "Apparel sourcing",
     status: "live",
@@ -107,10 +135,13 @@ export const projects: Project[] = [
     proof: ["Live in production", "Structured for B2B buyer enquiry capture"],
     technology: ["Next.js", "TypeScript", "Tailwind CSS", "Vercel"],
     href: "https://fashionprofiles.in",
+    image: "/projects/fashion-profiles.png",
     year: "2026",
   },
   {
     slug: "attram-ev",
+    accent: "mint",
+    featured: true,
     name: "Attram Technologies",
     domain: "EV infrastructure",
     status: "live",
@@ -121,10 +152,12 @@ export const projects: Project[] = [
     proof: ["Live in production", "Built for regional search visibility"],
     technology: ["Next.js", "TypeScript", "Tailwind CSS", "Vercel"],
     href: "https://attramevtech.com",
+    image: "/projects/attram-ev.png",
     year: "2026",
   },
   {
     slug: "quin-elements",
+    accent: "yellow",
     name: "Quin Elements",
     domain: "EV infrastructure",
     status: "live",
@@ -135,6 +168,7 @@ export const projects: Project[] = [
     proof: ["Live in production", "Dual audience: installation and OEM supply"],
     technology: ["Next.js", "TypeScript", "Tailwind CSS", "Vercel"],
     href: "https://quinelements.com",
+    image: "/projects/quin-elements.png",
     year: "2026",
   },
 ];

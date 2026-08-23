@@ -36,6 +36,14 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        /* The page is named "Works"; the route stays `/work` because that is
+           the URL already indexed and listed in the sitemap. This keeps the
+           plural spelling addressable rather than a 404. */
+        source: "/works",
+        destination: "/work",
+        permanent: true,
+      },
+      {
         // www → apex, 301, preserving the path.
         source: "/:path*",
         has: [{ type: "host", value: `www.${CANONICAL_HOST}` }],

@@ -17,9 +17,11 @@ const base =
 
 const variants: Record<Variant, string> = {
   // The one place the accent is used as a fill.
+  /* `text-on-ember`, not `text-ink`: see the token's note in globals.css.
+     The shadow reads from --shadow-ember, which each world re-tunes, because
+     a hardcoded orange glow smears grey on an ivory page. */
   primary:
-    "bg-ember text-ink hover:bg-ember-soft shadow-[0_10px_30px_-14px_rgba(255,91,40,0.7)] " +
-    "hover:shadow-[0_16px_44px_-16px_rgba(255,91,40,0.85)]",
+    "bg-ember text-on-ember hover:bg-ember-soft shadow-[var(--shadow-ember)]",
   secondary:
     "border border-line-strong bg-transparent text-paper hover:border-paper/40 hover:bg-paper/[0.04]",
   ghost: "text-paper/80 hover:text-paper",

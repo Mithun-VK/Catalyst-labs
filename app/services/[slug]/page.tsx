@@ -10,6 +10,7 @@ import { getService, services } from "@/content/services";
 import { site } from "@/lib/site";
 import { abs, buildMetadata } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { World } from "@/components/worlds/World";
 
 type Params = { slug: string };
 
@@ -94,7 +95,7 @@ export default async function ServiceDetailPage({
   };
 
   return (
-    <>
+    <World id="atelier">
       <JsonLd data={jsonLd} />
 
       <PageHeader
@@ -347,6 +348,6 @@ export default async function ServiceDetailPage({
         accent="Tell us the problem."
         lead="The first conversation is about your operation, not our stack. If a smaller fix would do the job, we will say so before quoting a larger one."
       />
-    </>
+    </World>
   );
 }

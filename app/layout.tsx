@@ -7,6 +7,7 @@ import { site } from "@/lib/site";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { SpotlightRoot } from "@/components/ui/SpotlightRoot";
 import { CustomCursor } from "@/components/ui/CustomCursor";
+import { RouteTransition } from "@/components/transitions/RouteTransition";
 
 /**
  * Three families, latin subset, SELF-HOSTED.
@@ -141,7 +142,7 @@ export default function RootLayout({
       <body>
         <a
           href="#main"
-          className="sr-only left-4 top-4 z-(--z-overlay) rounded-xs bg-ember px-4 py-3 text-small font-medium text-ink focus:not-sr-only focus:fixed"
+          className="sr-only left-4 top-4 z-(--z-overlay) rounded-xs bg-ember px-4 py-3 text-small font-medium text-on-ember focus:not-sr-only focus:fixed"
         >
           Skip to content
         </a>
@@ -151,7 +152,9 @@ export default function RootLayout({
 
         <div id="top" />
         <Navbar />
-        <main id="main">{children}</main>
+        <main id="main">
+          <RouteTransition>{children}</RouteTransition>
+        </main>
         <Footer />
         <StructuredData />
         <SpotlightRoot />
