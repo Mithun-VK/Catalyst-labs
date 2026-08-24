@@ -1,9 +1,12 @@
 "use client";
 
 import { useId, useState } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { services } from "@/content/services";
 import { Reveal } from "@/components/ui/Reveal";
+
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 /**
  * CATALYST SYSTEM MAP - the page's visual centrepiece.
@@ -12,23 +15,37 @@ import { Reveal } from "@/components/ui/Reveal";
  * connected by traced lines - the argument that Catalyst Labs combines
  * capabilities into one system rather than selling six disconnected
  * services. Every node IS one of the real entries in content/services.ts;
- * there is no separate five-node taxonomy invented for this diagram that
- * would need to be kept in sync with the real service list by hand.
+ * there is no separate taxonomy invented for this diagram that would need
+ * to be kept in sync with the real service list by hand. The detail panel
+ * draws on `outcome`, `deliverables` and `stack` - real fields already
+ * written for the service detail pages, not new copy invented for this
+ * component. It stays a teaser (one outcome line, four stack tags) rather
+ * than reproducing ServicesSection's full deliverables list two sections
+ * below - the map is the overview, the pinned index is the deep dive.
  *
- * MOTION SPLIT. The lines draw in once via the site's CSS scroll-driven
- * reveal (.trace-path, animation-timeline: view()) - this diagram does not
- * pin or scrub, so it has no reason to reach for GSAP, which is reserved on
- * this page for ServicesSection's actual pinned experience. Hover state
- * (the info panel below the map) is Motion, the same as every other local
- * interaction on the page.
+ * MOTION SPLIT. The lines and nodes draw in once via the site's CSS
+ * scroll-driven reveal (.trace-path / [data-stagger], animation-timeline:
+ * view()) - this diagram does not pin or scrub, so it has no reason to
+ * reach for GSAP, which is reserved on this page for ServicesSection's
+ * actual pinned experience. Everything that reacts to the pointer (the
+ * info panel crossfade, the node lift, the hub pulse) is Motion, the same
+ * as every other local interaction on the page. The pulse fires once per
+ * activation rather than looping - a continuous decorative animation next
+ * to this much text would be a distraction, not a polish.
+ *
+ * INTERACTION: hover/focus previews a node; a click or tap PINS it, so the
+ * panel survives the pointer leaving (hover alone excludes touch users -
+ * see the "hover vs tap" rule this was built against).
  *
  * MOBILE: no hover-only content. The vertical list below `lg` shows every
- * service's summary and index permanently - see the file's second return
- * branch.
+ * service's summary, outcome and deliverable count permanently - see the
+ * file's second return branch.
  */
 export function CatalystSystemMap() {
-  const [active, setActive] = useState<string | null>(null);
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [pinned, setPinned] = useState<string | null>(null);
   const gradId = useId();
+  const active = pinned ?? hovered;
   const activeService = services.find((s) => s.id === active) ?? null;
 
   return (
@@ -83,12 +100,11 @@ export function CatalystSystemMap() {
                     d={`M200,200 L${x},${y}`}
                     className="trace-path"
                     data-run
+                    data-active={active === s.id ? "true" : "false"}
                     style={
                       {
                         "--trace-length": 150,
                         "--trace-stagger": `${i * 5}%`,
-                        opacity: active === s.id ? 0.9 : 0.3,
-                        transition: "opacity 300ms",
                       } as React.CSSProperties
                     }
                   />
@@ -97,74 +113,141 @@ export function CatalystSystemMap() {
             </svg>
 
             {/* Centre hub */}
-            <div className="system-node absolute left-1/2 top-1/2 flex h-28 w-28 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full text-center">
+            <Reveal
+              variant="scale"
+              className="system-node absolute left-1/2 top-1/2 flex h-28 w-28 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full text-center"
+            >
               <span className="font-mono text-[0.5625rem] uppercase tracking-[0.14em] text-mute-deep">
                 Catalyst
               </span>
               <span className="mt-0.5 text-small font-medium uppercase tracking-[0.04em] text-paper">
                 Systems
               </span>
-            </div>
+
+              {/* One-shot pulse ring, fired on every activation - not a
+                  loop, so it reads as "a connection was made" rather than
+                  a decorative heartbeat. */}
+              <AnimatePresence>
+                {active ? (
+                  <motion.span
+                    key={active}
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 rounded-full border border-ember"
+                    initial={{ opacity: 0.55, scale: 0.85 }}
+                    animate={{ opacity: 0, scale: 1.55 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.7, ease: EASE }}
+                  />
+                ) : null}
+              </AnimatePresence>
+            </Reveal>
 
             {/* Capability nodes */}
-            {services.map((s, i) => {
-              const { xPct, yPct } = nodePositionPercent(i, services.length);
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onMouseEnter={() => setActive(s.id)}
-                  onMouseLeave={() => setActive((cur) => (cur === s.id ? null : cur))}
-                  onFocus={() => setActive(s.id)}
-                  onBlur={() => setActive((cur) => (cur === s.id ? null : cur))}
-                  className="system-node absolute w-36 -translate-x-1/2 -translate-y-1/2 rounded-sm px-4 py-3.5 text-left"
-                  style={{ left: `${xPct}%`, top: `${yPct}%` }}
-                  aria-expanded={active === s.id}
-                  aria-controls="system-map-detail"
-                >
-                  <span className="font-mono text-[0.625rem] tabular text-mute-deep">
-                    {s.index}
-                  </span>
-                  <span className="mt-1 block text-small font-medium uppercase tracking-[0.02em] text-paper">
-                    {s.title}
-                  </span>
-                </button>
-              );
-            })}
+            <div data-stagger style={{ "--stagger-step": "3%" } as React.CSSProperties}>
+              {services.map((s, i) => {
+                const { xPct, yPct } = nodePositionPercent(i, services.length);
+                const isPinned = pinned === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onMouseEnter={() => setHovered(s.id)}
+                    onMouseLeave={() =>
+                      setHovered((cur) => (cur === s.id ? null : cur))
+                    }
+                    onFocus={() => setHovered(s.id)}
+                    onBlur={() => setHovered((cur) => (cur === s.id ? null : cur))}
+                    onClick={() =>
+                      setPinned((cur) => (cur === s.id ? null : s.id))
+                    }
+                    className="system-node absolute w-36 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-sm px-4 py-3.5 text-left"
+                    style={{ left: `${xPct}%`, top: `${yPct}%` }}
+                    data-active={active === s.id ? "true" : "false"}
+                    aria-pressed={isPinned}
+                    aria-expanded={active === s.id}
+                    aria-controls="system-map-detail"
+                  >
+                    <span className="font-mono text-[0.625rem] tabular text-mute-deep">
+                      {s.index}
+                    </span>
+                    <span className="mt-1 block text-small font-medium uppercase tracking-[0.02em] text-paper">
+                      {s.title}
+                    </span>
+                    <span className="mt-1.5 block font-mono text-[0.5625rem] uppercase tracking-[0.1em] text-mute-deep">
+                      {s.deliverables.length} deliverables
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Info layer - reserves its own height so the diagram never
-              reflows when a node's summary appears or disappears. */}
+              reflows as the panel's content changes with the active
+              service. */}
           <div
             id="system-map-detail"
-            className="mx-auto mt-4 h-16 max-w-md text-center"
+            className="relative mx-auto mt-6 min-h-[9.5rem] max-w-xl"
             aria-live="polite"
           >
-            <AnimatePresence mode="wait">
-              {activeService ? (
-                <motion.p
-                  key={activeService.id}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.25 }}
-                  className="text-small text-mute"
-                >
-                  <span className="text-paper">{activeService.title}.</span>{" "}
-                  {activeService.summary}.
-                </motion.p>
-              ) : (
-                <motion.p
-                  key="idle"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="text-small text-mute-deep"
-                >
-                  Hover a capability to read what it covers.
-                </motion.p>
-              )}
-            </AnimatePresence>
+            <div className="grid">
+              <AnimatePresence mode="wait">
+                {activeService ? (
+                  <motion.div
+                    key={activeService.id}
+                    className="[grid-area:1/1]"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <p className="text-center text-small text-mute">
+                      <span className="text-paper">{activeService.title}.</span>{" "}
+                      {activeService.summary}.
+                    </p>
+                    <p className="mt-2 text-center text-[0.8125rem] leading-relaxed text-mute-deep">
+                      {activeService.outcome}
+                    </p>
+                    <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+                      <span className="font-mono text-[0.625rem] uppercase tracking-[0.16em] text-ember">
+                        {activeService.deliverables.length} deliverables
+                      </span>
+                      <span aria-hidden="true" className="h-3 w-px bg-line" />
+                      <ul className="flex flex-wrap justify-center gap-x-3 gap-y-1">
+                        {activeService.stack.slice(0, 4).map((tech) => (
+                          <li
+                            key={tech}
+                            className="font-mono text-[0.625rem] uppercase tracking-wider text-mute-deep"
+                          >
+                            {tech}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="mt-4 flex justify-center">
+                      <Link
+                        href={`/services/${activeService.id}`}
+                        className="inline-flex items-center gap-1.5 text-small text-ember underline-offset-4 hover:underline"
+                      >
+                        Explore this practice
+                        <span aria-hidden="true">→</span>
+                      </Link>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.p
+                    key="idle"
+                    className="[grid-area:1/1] pt-14 text-center text-small text-mute-deep"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    Hover, focus or tap a capability to see what it covers,
+                    delivers and runs on.
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
 
@@ -180,6 +263,9 @@ export function CatalystSystemMap() {
                   {s.title}
                 </p>
                 <p className="mt-1 text-small text-mute">{s.summary}.</p>
+                <p className="mt-2 font-mono text-[0.625rem] uppercase tracking-[0.1em] text-mute-deep">
+                  {s.deliverables.length} deliverables
+                </p>
               </div>
             </li>
           ))}

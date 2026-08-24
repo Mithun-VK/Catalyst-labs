@@ -2164,6 +2164,16 @@ body:has([data-world="system"]) {
     stroke: currentColor;
     stroke-width: 1;
     stroke-dashoffset: 0;
+    opacity: 0.3;
+    transition:
+      opacity var(--duration-base) var(--ease-out-soft),
+      stroke-width var(--duration-base) var(--ease-out-soft),
+      filter var(--duration-base) var(--ease-out-soft);
+  }
+  .trace-path[data-active="true"] {
+    opacity: 0.9;
+    stroke-width: 1.75;
+    filter: drop-shadow(0 0 5px currentColor);
   }
 
   @supports (animation-timeline: view()) {
@@ -2190,7 +2200,8 @@ body:has([data-world="system"]) {
       box-shadow var(--duration-slow) var(--ease-out-soft);
   }
   .system-node:hover,
-  .system-node:focus-visible {
+  .system-node:focus-visible,
+  .system-node[data-active="true"] {
     border-color: var(--color-ember);
     transform: translateY(-3px);
     box-shadow: var(--shadow-panel);
