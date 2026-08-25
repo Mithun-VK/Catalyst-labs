@@ -456,18 +456,31 @@
 /**
  * Custom cursor.
  *
- * Built from the site's own marks: the logo's square bracket, the ember dot,
- * and the corner-tick motif from the service and blueprint panels. See
- * CustomCursor.tsx for the motion half.
+ * Five worlds, five cursors. The mark is built from a trailing reticle and an
+ * exact-tracking dot; each world then re-shapes it into something that
+ * belongs on that page - a technical reticle on precision, a chunky comic
+ * blob on poster, a jeweller's caliper on atelier, a soft warm ring on
+ * studio, an instrument crosshair on system. See CustomCursor.tsx for the
+ * motion half and the per-world physics.
  *
- * Structure matters here: JS owns `transform` on .cursor-ring / .cursor-dot
- * (position only), and every state change animates an INNER element or a
- * non-transform property. Nothing else may write transform on those two
- * elements, or the per-frame position update and the state transition would
- * fight and the cursor would stutter.
+ * ONE COLOUR VARIABLE. Every mark below - shape, ticks, dot, glow - reads
+ * `--cursor-accent`. Worlds set it; the adaptive-contrast fallback overrides
+ * it. Nothing else paints a cursor colour, which is what makes the fallback
+ * impossible to apply to only half the marks.
+ *
+ * The fallbacks are LITERAL colours on purpose. The role tokens
+ * (`--color-ink`, `--color-paper`) swap meaning between the dark and light
+ * worlds, so resolving the fallback through `var(--color-ink)` painted an
+ * ivory cursor on the ivory atelier and poster grounds - a measured 1.00:1,
+ * i.e. perfectly invisible, which is exactly the bug this structure removes.
+ *
+ * ELEMENT OWNERSHIP. JS owns `transform` on .cursor-ring (position) and
+ * .cursor-warp (velocity); CSS owns .cursor-shape and .cursor-tick (state).
+ * Nothing writes transform on an element the other side already owns, or the
+ * per-frame write and the state transition would fight and the mark stutter.
  *
  * The system cursor is hidden only once `.has-custom-cursor` lands on <html>,
- * which only happens after a real pointermove — so keyboard-only visits and
+ * which only happens after a real pointermove - so keyboard-only visits and
  * no-JS both keep the native cursor.
  */
 @layer components {
@@ -481,6 +494,20 @@
     inset: 0;
     z-index: var(--z-cursor);
     pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out-soft);
+
+    /* The house cursor. Worlds override these five. */
+    --cursor-accent: var(--color-ember);
+    --cursor-size: 36px;
+    --cursor-dot: 7px;
+    --cursor-radius: var(--radius-xs);
+    --cursor-border: 1px;
+    --cursor-rest: 0.75;
+  }
+
+  .cursor-layer[data-on] {
+    opacity: 1;
   }
 
   .cursor-ring,
@@ -488,51 +515,60 @@
     position: fixed;
     top: 0;
     left: 0;
-    opacity: 0;
-    /* JS writes transform every frame; keep it off the transition list. */
-    transition: opacity var(--duration-base) var(--ease-out-soft);
     will-change: transform;
   }
 
-  .cursor-ring[data-on],
-  .cursor-dot[data-on] {
-    opacity: 1;
+  .cursor-ring {
+    width: var(--cursor-size);
+    height: var(--cursor-size);
+    margin: calc(var(--cursor-size) / -2) 0 0 calc(var(--cursor-size) / -2);
+  }
+
+  /* Velocity squash-and-stretch. Its own element so the JS-written rotate and
+     scale never collide with the shape's CSS state transitions. */
+  .cursor-warp {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
   }
 
   /* --- dot: tracks the pointer exactly ---------------------------------- */
   .cursor-dot {
-    width: 7px;
-    height: 7px;
-    margin: -3.5px 0 0 -3.5px;
+    width: var(--cursor-dot);
+    height: var(--cursor-dot);
+    margin: calc(var(--cursor-dot) / -2) 0 0 calc(var(--cursor-dot) / -2);
     border-radius: 999px;
-    background: var(--color-ember);
+    background: var(--cursor-accent);
     /* Small bloom so a 7px mark still reads over busy panels and imagery. */
-    box-shadow: 0 0 10px 1px rgb(255 91 40 / 0.55);
+    box-shadow: 0 0 10px 1px
+      color-mix(in srgb, var(--cursor-accent) 50%, transparent);
+    transition:
+      width var(--duration-base) var(--ease-out-quart),
+      height var(--duration-base) var(--ease-out-quart),
+      margin var(--duration-base) var(--ease-out-quart),
+      opacity var(--duration-base) var(--ease-out-quart);
   }
 
-  /* --- ring: trails the dot --------------------------------------------- */
-  .cursor-ring {
-    width: 36px;
-    height: 36px;
-    margin: -18px 0 0 -18px;
-  }
-
-  /* The visible bracket is an inner box, so it can scale and rotate freely
-     without touching the ring's JS-driven translate. */
-  .cursor-ring::before {
-    content: "";
+  /* --- shape: the reticle body ------------------------------------------
+     Carries `color` because CustomCursor reads it back to decide contrast:
+     computed `color` always resolves to a literal rgb(), a custom property
+     may not. */
+  .cursor-shape {
     position: absolute;
     inset: 0;
-    border: 1px solid rgb(255 91 40 / 0.75);
-    border-radius: var(--radius-xs);
+    color: var(--cursor-accent);
+    border: var(--cursor-border) solid currentColor;
+    border-radius: var(--cursor-radius);
+    opacity: var(--cursor-rest);
     transition:
       transform var(--duration-base) var(--ease-out-quart),
       opacity var(--duration-base) var(--ease-out-quart),
+      background-color var(--duration-base) var(--ease-out-quart),
       border-color var(--duration-base) var(--ease-out-quart);
   }
 
-  /* --- interactive: bracket opens into corner ticks and rotates ---------- */
-  .cursor-ring[data-variant="link"]::before {
+  /* --- interactive: bracket opens into corner ticks ---------------------- */
+  .cursor-ring[data-variant="link"] .cursor-shape {
     opacity: 0;
     transform: scale(1.5) rotate(45deg);
   }
@@ -541,7 +577,7 @@
     position: absolute;
     width: 9px;
     height: 9px;
-    color: var(--color-ember);
+    color: var(--cursor-accent);
     opacity: 0;
     transition:
       opacity var(--duration-base) var(--ease-out-quart),
@@ -576,7 +612,7 @@
     transform: translate(6px, -6px);
   }
 
-  /* Ticks fly out to the corners and hold — the reticle "locks on". */
+  /* Ticks fly out to the corners and hold - the reticle "locks on". */
   .cursor-ring[data-variant="link"] .cursor-tick {
     opacity: 1;
     transform: translate(0, 0);
@@ -586,50 +622,33 @@
     width: 4px;
     height: 4px;
     margin: -2px 0 0 -2px;
-    box-shadow: 0 0 8px 1px rgb(255 91 40 / 0.5);
   }
 
-  /* --- adaptive contrast ------------------------------------------------
-     Set by CustomCursor when ember would not stand out against the surface
-     underneath (most visibly: the ember-filled primary CTA). */
-  .cursor-ring[data-contrast="ink"]::before { border-color: rgb(8 9 10 / 0.9); }
-  .cursor-ring[data-contrast="ink"] .cursor-tick { color: var(--color-ink); }
-  .cursor-ring[data-contrast="ink"] ~ .cursor-dot {
-    background: var(--color-ink);
-    box-shadow: 0 0 10px 1px rgb(8 9 10 / 0.5);
-  }
-
-  .cursor-ring[data-contrast="paper"]::before { border-color: rgb(242 241 236 / 0.9); }
-  .cursor-ring[data-contrast="paper"] .cursor-tick { color: var(--color-paper); }
-  .cursor-ring[data-contrast="paper"] ~ .cursor-dot {
-    background: var(--color-paper);
-    box-shadow: 0 0 10px 1px rgb(242 241 236 / 0.5);
-  }
-
-  .cursor-ring[data-contrast="ink"][data-variant="text"]::before { background: var(--color-ink); }
-  .cursor-ring[data-contrast="paper"][data-variant="text"]::before { background: var(--color-paper); }
-
-  /* --- press: reticle tightens ------------------------------------------ */
-  .cursor-ring[data-active]::before {
+  /* --- press: the reticle tightens -------------------------------------- */
+  .cursor-ring[data-active] .cursor-shape {
     transform: scale(0.82);
-    border-color: rgb(255 91 40 / 0.95);
   }
-  .cursor-ring[data-active][data-variant="link"]::before {
+  .cursor-ring[data-active][data-variant="link"] .cursor-shape {
     transform: scale(1.5) rotate(45deg);
   }
   .cursor-ring[data-active] .cursor-tick {
-    transform: translate(0, 0) scale(0.8);
+    transform: translate(0, 0) scale(0.78);
   }
 
-  /* --- text field: bracket becomes an I-beam ---------------------------- */
-  .cursor-ring[data-variant="text"]::before {
+  /* --- text field: the shape becomes an I-beam -------------------------- */
+  .cursor-ring[data-variant="text"] .cursor-shape {
     inset: -2px auto -2px 50%;
     width: 2px;
     border: 0;
     border-radius: 1px;
-    background: var(--color-ember);
+    background: var(--cursor-accent);
+    box-shadow: none;
     opacity: 1;
     transform: translateX(-50%);
+  }
+  .cursor-ring[data-variant="text"] .cursor-shape::before,
+  .cursor-ring[data-variant="text"] .cursor-shape::after {
+    display: none;
   }
   .cursor-ring[data-variant="text"] .cursor-tick {
     opacity: 0;
@@ -637,9 +656,146 @@
   .cursor-ring[data-variant="text"] ~ .cursor-dot {
     opacity: 0;
   }
+
+  /* ======================================================================
+     WORLD PERSONALITIES
+     Only what genuinely differs per world. Structure, hit behaviour and the
+     contrast fallback are shared.
+     ====================================================================== */
+
+  /* --- POSTER (work): comic. Hard edges, thick outline, sticker shadow,
+     and a blob that swells and floods over a control. No blur anywhere -
+     softness is what would make this read as generic rather than printed. */
+  .cursor-layer[data-world="poster"] {
+    --cursor-accent: #0a0a0a; /* the world's own paper/text near-black */
+    --cursor-size: 30px;
+    --cursor-dot: 8px;
+    --cursor-radius: 999px;
+    --cursor-border: 2.5px;
+    --cursor-rest: 1;
+    --cursor-comic: #c0330a; /* its ember, as the offset shadow */
+  }
+  .cursor-layer[data-world="poster"] .cursor-shape {
+    box-shadow: 3px 3px 0 0 var(--cursor-comic);
+  }
+  .cursor-layer[data-world="poster"] .cursor-dot {
+    box-shadow: none;
+  }
+  .cursor-layer[data-world="poster"] .cursor-ring[data-variant="link"] .cursor-shape {
+    opacity: 1;
+    transform: scale(1.85);
+    background: var(--cursor-comic);
+    box-shadow: 4px 4px 0 0 currentColor;
+  }
+  .cursor-layer[data-world="poster"]
+    .cursor-ring[data-active][data-variant="link"]
+    .cursor-shape {
+    transform: scale(1.55);
+    box-shadow: 2px 2px 0 0 currentColor;
+  }
+  .cursor-layer[data-world="poster"] .cursor-tick {
+    display: none;
+  }
+  .cursor-layer[data-world="poster"] .cursor-ring[data-variant="link"] ~ .cursor-dot {
+    opacity: 0;
+  }
+
+  /* --- ATELIER (services, process): a jeweller's caliper. A large, quiet
+     gold ring that CONTRACTS onto a control rather than exploding off it,
+     with hairline ticks. Restraint is the whole point; no glow, because a
+     bloom is what would make gold read as cheap. */
+  .cursor-layer[data-world="atelier"] {
+    --cursor-size: 46px;
+    --cursor-dot: 5px;
+    --cursor-radius: 999px;
+    --cursor-border: 1px;
+    --cursor-rest: 0.5;
+  }
+  .cursor-layer[data-world="atelier"] .cursor-dot {
+    box-shadow: none;
+  }
+  .cursor-layer[data-world="atelier"] .cursor-ring[data-variant="link"] .cursor-shape {
+    opacity: 0.9;
+    transform: scale(0.62);
+  }
+  .cursor-layer[data-world="atelier"]
+    .cursor-ring[data-active][data-variant="link"]
+    .cursor-shape {
+    transform: scale(0.52);
+  }
+  .cursor-layer[data-world="atelier"] .cursor-tick {
+    width: 7px;
+    height: 7px;
+    border-width: 1px !important;
+  }
+
+  /* --- STUDIO (about): warm and soft. The ring opens and fills faintly,
+     the one world where the cursor is meant to feel friendly. */
+  .cursor-layer[data-world="studio"] {
+    --cursor-size: 34px;
+    --cursor-radius: 999px;
+    --cursor-border: 1.5px;
+    --cursor-rest: 0.6;
+  }
+  .cursor-layer[data-world="studio"] .cursor-ring[data-variant="link"] .cursor-shape {
+    opacity: 1;
+    transform: scale(1.32);
+    background: color-mix(in srgb, currentColor 16%, transparent);
+  }
+  .cursor-layer[data-world="studio"] .cursor-tick {
+    display: none;
+  }
+
+  /* --- SYSTEM (contact, ai): instrumentation. A square reticle with
+     crosshair arms in the neon signal colour, which is emitted light here
+     rather than printed ink - so this is the one world that keeps a bloom. */
+  .cursor-layer[data-world="system"] {
+    --cursor-accent: var(--color-signal);
+    --cursor-size: 34px;
+    --cursor-dot: 5px;
+    --cursor-radius: 0;
+    --cursor-border: 1px;
+    --cursor-rest: 0.7;
+  }
+  .cursor-layer[data-world="system"] .cursor-shape::before,
+  .cursor-layer[data-world="system"] .cursor-shape::after {
+    content: "";
+    position: absolute;
+    background: currentColor;
+    opacity: 0.75;
+  }
+  .cursor-layer[data-world="system"] .cursor-shape::before {
+    left: 50%;
+    top: -7px;
+    bottom: -7px;
+    width: 1px;
+    margin-left: -0.5px;
+  }
+  .cursor-layer[data-world="system"] .cursor-shape::after {
+    top: 50%;
+    left: -7px;
+    right: -7px;
+    height: 1px;
+    margin-top: -0.5px;
+  }
+
+  /* ======================================================================
+     ADAPTIVE CONTRAST - last, so it beats every world above.
+     Set by CustomCursor when the world's own accent drops under 3:1 against
+     the surface under the pointer (most visibly: a filled primary CTA).
+     Literal colours only - see the note at the top of this block.
+     ====================================================================== */
+  .cursor-layer[data-contrast="dark"] {
+    --cursor-accent: #08090a;
+    --cursor-comic: #f4f3ef;
+  }
+  .cursor-layer[data-contrast="light"] {
+    --cursor-accent: #f4f3ef;
+    --cursor-comic: #0a0a0a;
+  }
 }
 
-/* Never render for touch or reduced-motion visitors — belt and braces
+/* Never render for touch or reduced-motion visitors - belt and braces
    alongside the matchMedia guard in CustomCursor.tsx. */
 @media (pointer: coarse), (prefers-reduced-motion: reduce) {
   .cursor-layer {
@@ -2194,6 +2350,14 @@ body:has([data-world="system"]) {
   .system-node {
     border: 1px solid var(--color-line-strong);
     background: var(--color-ink-raised);
+    /* This class must never sit on an element that ALSO carries a
+       scroll-driven entrance animation (Reveal / [data-stagger]) or a
+       Tailwind `translate-*` utility - both already own a transform-ish
+       property, and whichever wins the cascade would silently swallow
+       this lift. In the system map, the entrance animation and the
+       centering `translate-x/y` utilities live on a wrapping element one
+       level up; this class stays on the plain interactive node itself, so
+       `transform` here is uncontested. */
     transition:
       border-color var(--duration-slow) var(--ease-out-soft),
       transform var(--duration-base) var(--ease-out-quart),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { services } from "@/content/services";
@@ -45,6 +45,7 @@ export function CatalystSystemMap() {
   const [hovered, setHovered] = useState<string | null>(null);
   const [pinned, setPinned] = useState<string | null>(null);
   const gradId = useId();
+  const diagramRef = useRef<HTMLDivElement>(null);
   const active = pinned ?? hovered;
   const activeService = services.find((s) => s.id === active) ?? null;
 
@@ -78,7 +79,23 @@ export function CatalystSystemMap() {
         </Reveal>
 
         {/* ---- desktop: the hub-and-spoke diagram ------------------- */}
-        <div className="relative mt-20 hidden lg:block">
+        {/* Leave/blur clearing lives on THIS wrapper, not on each node.
+            The info panel sits below the ring, so reaching its "Explore"
+            link means crossing empty space between a node and the panel -
+            a per-node onMouseLeave would clear the active service (and
+            collapse the panel) mid-crossing, before a click could ever
+            land. Clearing only when the pointer/focus leaves the whole
+            wrapper keeps the panel open for that crossing. */}
+        <div
+          ref={diagramRef}
+          className="relative mt-20 hidden lg:block"
+          onMouseLeave={() => setHovered(null)}
+          onBlur={(e) => {
+            if (!diagramRef.current?.contains(e.relatedTarget as Node | null)) {
+              setHovered(null);
+            }
+          }}
+        >
           <div className="relative mx-auto aspect-square w-full max-w-[38rem]">
             <svg
               viewBox="0 0 400 400"
@@ -112,71 +129,80 @@ export function CatalystSystemMap() {
               })}
             </svg>
 
-            {/* Centre hub */}
+            {/* Centre hub - the Reveal/entrance transform lives on this
+                wrapper; `.system-node` (and its own hover transform,
+                unused here since the hub isn't interactive) stays on the
+                plain inner plate. */}
             <Reveal
               variant="scale"
-              className="system-node absolute left-1/2 top-1/2 flex h-28 w-28 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full text-center"
+              className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2"
             >
-              <span className="font-mono text-[0.5625rem] uppercase tracking-[0.14em] text-mute-deep">
-                Catalyst
-              </span>
-              <span className="mt-0.5 text-small font-medium uppercase tracking-[0.04em] text-paper">
-                Systems
-              </span>
+              <div className="system-node relative flex h-full w-full flex-col items-center justify-center rounded-full text-center">
+                <span className="font-mono text-[0.5625rem] uppercase tracking-[0.14em] text-mute-deep">
+                  Catalyst
+                </span>
+                <span className="mt-0.5 text-small font-medium uppercase tracking-[0.04em] text-paper">
+                  Systems
+                </span>
 
-              {/* One-shot pulse ring, fired on every activation - not a
-                  loop, so it reads as "a connection was made" rather than
-                  a decorative heartbeat. */}
-              <AnimatePresence>
-                {active ? (
-                  <motion.span
-                    key={active}
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-0 rounded-full border border-ember"
-                    initial={{ opacity: 0.55, scale: 0.85 }}
-                    animate={{ opacity: 0, scale: 1.55 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.7, ease: EASE }}
-                  />
-                ) : null}
-              </AnimatePresence>
+                {/* One-shot pulse ring, fired on every activation - not a
+                    loop, so it reads as "a connection was made" rather
+                    than a decorative heartbeat. */}
+                <AnimatePresence>
+                  {active ? (
+                    <motion.span
+                      key={active}
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-0 rounded-full border border-ember"
+                      initial={{ opacity: 0.55, scale: 0.85 }}
+                      animate={{ opacity: 0, scale: 1.55 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.7, ease: EASE }}
+                    />
+                  ) : null}
+                </AnimatePresence>
+              </div>
             </Reveal>
 
-            {/* Capability nodes */}
+            {/* Capability nodes. Each gets a positioned wrapper that owns
+                the stagger entrance + centering translate; the button
+                inside stays untouched by either, so its own hover/focus
+                lift (`.system-node`, `transform`) is never shadowed by an
+                animation still holding that property from the entrance. */}
             <div data-stagger style={{ "--stagger-step": "3%" } as React.CSSProperties}>
               {services.map((s, i) => {
                 const { xPct, yPct } = nodePositionPercent(i, services.length);
                 const isPinned = pinned === s.id;
                 return (
-                  <button
+                  <div
                     key={s.id}
-                    type="button"
-                    onMouseEnter={() => setHovered(s.id)}
-                    onMouseLeave={() =>
-                      setHovered((cur) => (cur === s.id ? null : cur))
-                    }
-                    onFocus={() => setHovered(s.id)}
-                    onBlur={() => setHovered((cur) => (cur === s.id ? null : cur))}
-                    onClick={() =>
-                      setPinned((cur) => (cur === s.id ? null : s.id))
-                    }
-                    className="system-node absolute w-36 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-sm px-4 py-3.5 text-left"
+                    className="absolute w-36 -translate-x-1/2 -translate-y-1/2"
                     style={{ left: `${xPct}%`, top: `${yPct}%` }}
-                    data-active={active === s.id ? "true" : "false"}
-                    aria-pressed={isPinned}
-                    aria-expanded={active === s.id}
-                    aria-controls="system-map-detail"
                   >
-                    <span className="font-mono text-[0.625rem] tabular text-mute-deep">
-                      {s.index}
-                    </span>
-                    <span className="mt-1 block text-small font-medium uppercase tracking-[0.02em] text-paper">
-                      {s.title}
-                    </span>
-                    <span className="mt-1.5 block font-mono text-[0.5625rem] uppercase tracking-[0.1em] text-mute-deep">
-                      {s.deliverables.length} deliverables
-                    </span>
-                  </button>
+                    <button
+                      type="button"
+                      onMouseEnter={() => setHovered(s.id)}
+                      onFocus={() => setHovered(s.id)}
+                      onClick={() =>
+                        setPinned((cur) => (cur === s.id ? null : s.id))
+                      }
+                      className="system-node block w-full cursor-pointer rounded-sm px-4 py-3.5 text-left"
+                      data-active={active === s.id ? "true" : "false"}
+                      aria-pressed={isPinned}
+                      aria-expanded={active === s.id}
+                      aria-controls="system-map-detail"
+                    >
+                      <span className="font-mono text-[0.625rem] tabular text-mute-deep">
+                        {s.index}
+                      </span>
+                      <span className="mt-1 block text-small font-medium uppercase tracking-[0.02em] text-paper">
+                        {s.title}
+                      </span>
+                      <span className="mt-1.5 block font-mono text-[0.5625rem] uppercase tracking-[0.1em] text-mute-deep">
+                        {s.deliverables.length} deliverables
+                      </span>
+                    </button>
+                  </div>
                 );
               })}
             </div>

@@ -1,56 +1,175 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { usePrefersReducedMotion } from "@/lib/hooks";
+import { worldForPath, type WorldId } from "@/lib/worlds";
 
 /**
  * CUSTOM CURSOR.
  *
  * The motion half of the cursor; the marks themselves are drawn in
- * globals.css. A 7px ember dot tracks the pointer exactly, and a 36px bracket
- * trails it, opening into corner ticks over anything interactive.
+ * globals.css. A dot tracks the pointer exactly and a reticle trails it,
+ * changing state over anything interactive.
  *
- * Rules this file must not break:
- *  - JS owns `transform` on .cursor-ring and .cursor-dot and nothing else may,
- *    or the per-frame position write and the CSS state transition will fight.
- *    Every state change here is an attribute, never an inline transform.
- *  - The native cursor is only hidden after a real pointermove, so keyboard
- *    and no-JS visits keep it. That is why `has-custom-cursor` is added in the
- *    move handler rather than on mount.
- *  - Fine pointers only, and never under reduced motion: a trailing element
- *    is exactly the kind of motion that preference is asking us to drop.
+ * WORLD-AWARE. Each design world gets its own cursor personality - the
+ * comic blob on the poster world, the jeweller's caliper on the atelier
+ * world, the instrument crosshair on the system world - because a single
+ * house cursor on five deliberately different pages reads as an oversight.
+ * The LOOK is CSS, keyed off `data-world` on the layer; the FEEL is the
+ * tuning table below, which changes how the thing physically moves.
+ *
+ * ELEMENT OWNERSHIP (the rule that keeps this from stuttering).
+ * Every animated element has exactly ONE owner, so a per-frame JS write and
+ * a CSS state transition can never fight over the same property:
+ *
+ *   .cursor-ring   JS    translate only (pointer position, magnet-adjusted)
+ *   .cursor-warp   JS    rotate + scale only (velocity squash-and-stretch)
+ *   .cursor-shape  CSS   state transitions (hover, press, text)
+ *   .cursor-tick   CSS   state transitions
+ *   .cursor-dot    JS    translate only
+ *
+ * COLOUR (see globals.css). There is exactly one colour variable,
+ * `--cursor-accent`, set per world on the layer and read by every mark. The
+ * adaptive-contrast fallback overrides that same variable with a LITERAL
+ * near-black or near-white - never a role token like `--color-ink`, which
+ * inverts per world and previously painted the cursor ivory-on-ivory (a
+ * measured 1.00:1) on both light worlds.
+ *
+ * Fine pointers only, and never under reduced motion: a trailing, stretching
+ * element is exactly the kind of motion that preference is asking us to drop.
  */
+
+type Tuning = {
+  /** Share of the remaining distance the reticle covers each frame. */
+  ease: number;
+  /** Velocity -> stretch conversion, and the ceiling on it. */
+  stretch: number;
+  maxStretch: number;
+  /** How strongly the reticle is pulled to the centre of a hovered control. */
+  magnet: number;
+};
+
+/**
+ * How each world MOVES. Read as a personality: the poster world is loose and
+ * exaggerated, the atelier world is heavy and restrained, the system world is
+ * near-instant and barely deforms because instruments do not wobble.
+ */
+const TUNING: Record<WorldId, Tuning> = {
+  precision: { ease: 0.18, stretch: 0.012, maxStretch: 0.34, magnet: 0.18 },
+  poster: { ease: 0.26, stretch: 0.03, maxStretch: 0.8, magnet: 0.34 },
+  atelier: { ease: 0.11, stretch: 0.005, maxStretch: 0.16, magnet: 0.12 },
+  studio: { ease: 0.2, stretch: 0.016, maxStretch: 0.44, magnet: 0.24 },
+  system: { ease: 0.34, stretch: 0.004, maxStretch: 0.12, magnet: 0.1 },
+};
+
+/** Magnetism only makes sense for a control small enough to have a centre. */
+const MAGNET_MAX_W = 360;
+const MAGNET_MAX_H = 160;
+
 export function CustomCursor() {
   const reduced = usePrefersReducedMotion();
+  const pathname = usePathname();
+  const world = worldForPath(pathname ?? "/");
+
+  const layerRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
+  const warpRef = useRef<HTMLDivElement>(null);
+  const shapeRef = useRef<HTMLSpanElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (reduced) return;
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
 
+    const layer = layerRef.current;
     const ring = ringRef.current;
+    const warp = warpRef.current;
+    const shape = shapeRef.current;
     const dot = dotRef.current;
-    if (!ring || !dot) return;
+    if (!layer || !ring || !warp || !shape || !dot) return;
 
     const root = document.documentElement;
+    const tune = TUNING[world.id];
 
-    // Pointer position, and the ring's trailing position.
+    /* The world's own accent, resolved to literal rgb by the engine. Read
+       from `color` on a real element rather than from the custom property:
+       computed `color` is always a concrete rgb() string, whereas a custom
+       property can hand back an unresolved `var(...)` chain. Contrast is
+       cleared first so this reads the world's colour and not a previous
+       page's flipped fallback. */
+    layer.removeAttribute("data-contrast");
+    const baseAccent = parseRgb(getComputedStyle(shape).color);
+
     let px = 0;
     let py = 0;
     let rx = 0;
     let ry = 0;
+    let prevRx = 0;
+    let prevRy = 0;
     let started = false;
+    let running = false;
     let frame = 0;
     let lastTarget: Element | null = null;
+    let magnetEl: Element | null = null;
+    let recheck = 0;
 
     const tick = () => {
-      // Exponential approach: the ring covers ~18% of the remaining distance
-      // each frame, which reads as weight without feeling laggy.
-      rx += (px - rx) * 0.18;
-      ry += (py - ry) * 0.18;
+      // Where the reticle wants to be: the pointer, pulled toward the centre
+      // of a hovered control when one is magnetised.
+      let tx = px;
+      let ty = py;
+      if (magnetEl) {
+        const r = magnetEl.getBoundingClientRect();
+        // A control removed or collapsed mid-hover has a zero rect; ignore it
+        // rather than dragging the cursor to the top-left corner.
+        if (r.width > 0 && r.height > 0) {
+          tx += (r.left + r.width / 2 - px) * tune.magnet;
+          ty += (r.top + r.height / 2 - py) * tune.magnet;
+        }
+      }
+
+      prevRx = rx;
+      prevRy = ry;
+      rx += (tx - rx) * tune.ease;
+      ry += (ty - ry) * tune.ease;
+
+      // Squash and stretch along the direction of travel. Driven by the
+      // SMOOTHED reticle delta rather than raw pointer velocity, which would
+      // pass every jitter straight through to the shape.
+      const dx = rx - prevRx;
+      const dy = ry - prevRy;
+      const speed = Math.hypot(dx, dy);
+      const s = Math.min(speed * tune.stretch, tune.maxStretch);
+
       ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
       dot.style.transform = `translate3d(${px}px, ${py}px, 0)`;
+      warp.style.transform =
+        s > 0.001
+          ? `rotate(${Math.atan2(dy, dx)}rad) scale(${1 + s}, ${1 - s * 0.6})`
+          : "";
+
+      // Idle stop: once the reticle is within half a pixel of its target
+      // there is nothing left to see, so snap it exactly there and yield the
+      // main thread instead of burning a frame callback forever. Half a pixel
+      // is below the threshold of a visible jump, and an exponential approach
+      // would otherwise never formally arrive. A magnetised control keeps the
+      // loop alive, since its rect can move under a stationary pointer.
+      if (!magnetEl && speed < 0.4 && Math.hypot(tx - rx, ty - ry) < 0.5) {
+        ring.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+        warp.style.transform = "";
+        rx = tx;
+        ry = ty;
+        running = false;
+        frame = 0;
+        return;
+      }
+      frame = requestAnimationFrame(tick);
+    };
+
+    const start = () => {
+      if (running) return;
+      running = true;
       frame = requestAnimationFrame(tick);
     };
 
@@ -60,15 +179,15 @@ export function CustomCursor() {
 
       if (!started) {
         started = true;
-        // Snap the ring to the first known position rather than flying in
-        // from the top-left corner.
+        // Snap to the first known position rather than flying in from 0,0.
         rx = px;
         ry = py;
+        prevRx = px;
+        prevRy = py;
         root.classList.add("has-custom-cursor");
-        ring.setAttribute("data-on", "");
-        dot.setAttribute("data-on", "");
-        frame = requestAnimationFrame(tick);
+        layer.setAttribute("data-on", "");
       }
+      start();
 
       const target = e.target as Element | null;
       if (target !== lastTarget) {
@@ -77,57 +196,90 @@ export function CustomCursor() {
       }
     };
 
+    const evaluateContrast = (target: Element | null) => {
+      const contrast = baseAccent ? contrastFor(target, baseAccent) : null;
+      if (contrast) layer.setAttribute("data-contrast", contrast);
+      else layer.removeAttribute("data-contrast");
+    };
+
     const applyTarget = (target: Element | null) => {
       const variant = variantFor(target);
       if (variant) ring.setAttribute("data-variant", variant);
       else ring.removeAttribute("data-variant");
 
-      const contrast = contrastFor(target);
-      if (contrast) ring.setAttribute("data-contrast", contrast);
-      else ring.removeAttribute("data-contrast");
+      // Magnetise only to a genuine, reasonably sized control.
+      const control =
+        variant === "link" ? target?.closest?.(INTERACTIVE) ?? null : null;
+      if (control) {
+        const r = control.getBoundingClientRect();
+        magnetEl =
+          r.width <= MAGNET_MAX_W && r.height <= MAGNET_MAX_H ? control : null;
+      } else {
+        magnetEl = null;
+      }
+
+      evaluateContrast(target);
+
+      /* A surface can CHANGE COLOUR under a stationary pointer: the nav CTA
+         fills with the accent on hover, which is the exact moment an
+         accent-coloured cursor would disappear into it. The reading above
+         happens on the frame the pointer arrives, before that transition has
+         run, so take a second reading once it has settled. */
+      window.clearTimeout(recheck);
+      recheck = window.setTimeout(() => evaluateContrast(target), 320);
     };
+
+    const onDown = () => ring.setAttribute("data-active", "");
+    const onUp = () => ring.removeAttribute("data-active");
 
     // Leaving the window (or switching tabs) hides the marks, so a stale
     // cursor is never left painted over the page.
-    const hide = () => {
-      ring.removeAttribute("data-on");
-      dot.removeAttribute("data-on");
-    };
+    const hide = () => layer.removeAttribute("data-on");
     const show = () => {
-      if (started) {
-        ring.setAttribute("data-on", "");
-        dot.setAttribute("data-on", "");
-      }
+      if (started) layer.setAttribute("data-on", "");
     };
 
     document.addEventListener("pointermove", onMove, { passive: true });
+    document.addEventListener("pointerdown", onDown, { passive: true });
+    document.addEventListener("pointerup", onUp, { passive: true });
     document.addEventListener("pointerleave", hide);
     document.addEventListener("pointerenter", show);
     window.addEventListener("blur", hide);
 
     return () => {
       document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("pointerup", onUp);
       document.removeEventListener("pointerleave", hide);
       document.removeEventListener("pointerenter", show);
       window.removeEventListener("blur", hide);
       if (frame) cancelAnimationFrame(frame);
+      window.clearTimeout(recheck);
       root.classList.remove("has-custom-cursor");
     };
-  }, [reduced]);
+  }, [reduced, world.id]);
 
-  // Rendered for every visitor, including coarse pointers: the elements are
-  // inert and invisible until `data-on` is set, and rendering them on the
-  // server keeps the markup identical across hydration.
+  /* Rendered for every visitor, including coarse pointers: the elements are
+     inert and invisible until `data-on` is set, and rendering them on the
+     server keeps the markup identical across hydration. */
   return (
-    <div className="cursor-layer" aria-hidden="true">
+    <div
+      ref={layerRef}
+      className="cursor-layer"
+      data-world={world.id}
+      aria-hidden="true"
+    >
       <div ref={ringRef} className="cursor-ring">
-        <span className="cursor-tick cursor-tick-tl" />
-        <span className="cursor-tick cursor-tick-tr" />
-        <span className="cursor-tick cursor-tick-br" />
-        <span className="cursor-tick cursor-tick-bl" />
+        <div ref={warpRef} className="cursor-warp">
+          <span ref={shapeRef} className="cursor-shape" />
+          <span className="cursor-tick cursor-tick-tl" />
+          <span className="cursor-tick cursor-tick-tr" />
+          <span className="cursor-tick cursor-tick-br" />
+          <span className="cursor-tick cursor-tick-bl" />
+        </div>
       </div>
       {/* Must remain a FOLLOWING sibling of the ring - the dot's interactive
-          and contrast states are selected with `.cursor-ring[...] ~ .cursor-dot`. */}
+          state is selected with `.cursor-ring[...] ~ .cursor-dot`. */}
       <div ref={dotRef} className="cursor-dot" />
     </div>
   );
@@ -147,22 +299,26 @@ function variantFor(target: Element | null): "link" | "text" | null {
 /**
  * Picks a cursor colour that stays visible on the surface underneath.
  *
- * Ember is the default and is left in place whenever it clears 3:1 against
- * the surface. Below that - most visibly on the ember-filled primary CTA -
- * we switch to whichever of ink or paper reads better, rather than leaving
- * an ember cursor to disappear into an ember button.
+ * The world's own accent is kept whenever it clears 3:1 against that surface.
+ * Below that - most visibly on a filled primary CTA - we fall back to
+ * whichever of near-black or near-white reads better. Both fallbacks are
+ * LITERAL colours: the role tokens (`--color-ink`, `--color-paper`) inverse
+ * themselves between the dark and light worlds, so resolving the fallback
+ * through them is what previously painted an ivory cursor on an ivory page.
  */
-function contrastFor(target: Element | null): "ink" | "paper" | null {
+function contrastFor(
+  target: Element | null,
+  accent: [number, number, number]
+): "dark" | "light" | null {
   const bg = surfaceColor(target);
   if (!bg) return null;
 
-  const ember = relativeLuminance(255, 91, 40);
   const surface = relativeLuminance(bg[0], bg[1], bg[2]);
-  if (contrastRatio(ember, surface) >= 3) return null;
+  if (contrastRatio(relativeLuminance(...accent), surface) >= 3) return null;
 
-  const ink = contrastRatio(relativeLuminance(8, 9, 10), surface);
-  const paper = contrastRatio(relativeLuminance(242, 241, 236), surface);
-  return ink >= paper ? "ink" : "paper";
+  const dark = contrastRatio(relativeLuminance(8, 9, 10), surface);
+  const light = contrastRatio(relativeLuminance(244, 243, 239), surface);
+  return dark >= light ? "dark" : "light";
 }
 
 /** First non-transparent background colour walking up from the target. */

@@ -77,33 +77,98 @@ export function WorksShowcase({ projects }: { projects: Project[] }) {
           );
         });
 
+        /* ---- catch-up smoothing -------------------------------------
+           `applyProgress` is driven by a progress value that EASES toward
+           the scroll position instead of equalling it, so a fast flick
+           plays through the intermediate states on its way rather than
+           teleporting past them. This is what makes the transition words
+           survive a quick scroll: they are positioned in scroll space, and
+           without this, a 1000px gesture crosses all four of them inside a
+           single frame.
+
+           It has to be done by hand. `scrub` does NOT do this here: scrub
+           smooths the playhead of an ATTACHED animation, and this component
+           has none - it reads `self.progress` and writes with gsap.set().
+           `self.progress` is the raw scroll position and is never scrubbed,
+           so the previous `scrub: 1.4` bought no smoothing whatever; the
+           progress line was measured tracking scrollY perfectly linearly.
+
+           Lag is proportional to scroll velocity, which is the point: at a
+           normal reading pace the rendered value sits right on the scroll
+           position and nothing feels delayed, while a flick gets ~0.8s of
+           playthrough. */
+        const SMOOTH = 0.085; // per frame; ~0.5s to cover 95% of a small jump
+        /* Ceiling on how much progress a single frame may advance.
+           A plain exponential lerp front-loads badly: it covers most of a
+           big jump in the first few frames and then crawls into the target,
+           so the words at the START of a flick flash past in ~2 frames while
+           the LAST one sits on screen for three seconds. Capping the rate
+           makes a long traversal play at a roughly even speed, giving every
+           word a comparable turn, and the exponential above still takes over
+           for the final soft landing. */
+        const MAX_STEP = 0.002;
+        let targetP = 0;
+        let renderP = 0;
+        let raf = 0;
+
+        const render = () => {
+          const delta = targetP - renderP;
+          /* Settle threshold, in progress units. ~0.0001 is under two pixels
+             of scroll across the whole section - far below anything visible.
+             It has to be this loose: an exponential tail chasing a much
+             tighter target spends over a second crawling through changes
+             nobody can see, which delays the settle and burns frames for
+             nothing. */
+          if (Math.abs(delta) < 0.0001) {
+            renderP = targetP;
+            applyProgress(renderP, panels, numberItems, progressLine);
+            raf = 0;
+            return;
+          }
+          const step = delta * SMOOTH;
+          renderP += Math.max(-MAX_STEP, Math.min(MAX_STEP, step));
+          applyProgress(renderP, panels, numberItems, progressLine);
+          raf = requestAnimationFrame(render);
+        };
+        const kick = () => {
+          if (!raf) raf = requestAnimationFrame(render);
+        };
+
         const trigger = ScrollTrigger.create({
           trigger: section,
           start: "top top",
-          // More scroll distance per project than it first reads as too little
-          // (2.6x viewport height): the same physical scroll gesture now
-          // covers less of the total reveal, which is what actually reads as
-          // "smoother" - scrub alone can't fix a track that's simply too
-          // short for how much is happening on it. The exit sequence
-          // (content clears -> blueprint pulse -> four impact words, each
-          // strictly non-overlapping - see applyExit) is what benefits most:
-          // it now gets a genuinely unhurried scroll distance per word
-          // instead of flashing past in a fraction of a normal scroll tick.
-          end: () => "+=" + panels.length * window.innerHeight * 2.6,
+          // 3.2x viewport height per project. The figure is set by the
+          // narrowest thing on the track rather than by feel: each transition
+          // word has to stay legible for longer than one wheel tick (~100px),
+          // or a single ordinary scroll gesture steps straight over one and
+          // the visitor never sees it. At 2.6x each word was legible for a
+          // MEASURED 80px - narrower than that tick, which is precisely why
+          // words went missing when scrolling quickly. See the budget note
+          // above EXIT_START for how a segment is divided.
+          end: () => "+=" + panels.length * window.innerHeight * 3.2,
           pin,
-          // A number, not `true`: the animation state chases the scroll
-          // position with this many seconds of catch-up easing instead of
-          // snapping to it every frame - the difference between a scrubber
-          // that feels driven and one that feels directly grabbed.
-          scrub: 1.4,
+          /* Deliberately NO `scrub`. It smooths an attached animation's
+             playhead; with an onUpdate/gsap.set implementation like this one
+             it changes nothing except which tick onUpdate fires on. The
+             catch-up easing this section needs is the `render` loop above,
+             which is real and measurable. */
           anticipatePin: 1,
-          onUpdate: (self) =>
-            applyProgress(self.progress, panels, numberItems, progressLine),
+          onUpdate: (self) => {
+            targetP = self.progress;
+            kick();
+          },
         });
 
-        applyProgress(trigger.progress, panels, numberItems, progressLine);
+        // First paint lands on the current scroll position exactly, with no
+        // ease-in from zero.
+        targetP = trigger.progress;
+        renderP = trigger.progress;
+        applyProgress(renderP, panels, numberItems, progressLine);
 
-        return () => trigger.kill();
+        return () => {
+          if (raf) cancelAnimationFrame(raf);
+          trigger.kill();
+        };
       }
     );
 
@@ -208,14 +273,25 @@ function buildPanelRefs(root: HTMLElement): PanelRefs {
    Frame-by-frame progress application
    ========================================================================== */
 
-/** Local progress spent entering, before the long hold. */
-const ENTER_END = 0.12;
-/**
- * Local progress where the hold ends and the exit/impact sequence begins.
- * Metrics, tech stack and CTA sit fully settled and readable for the bulk of
- * the segment before anything starts moving again.
+/*
+ * SEGMENT BUDGET (local progress 0-1 within one project's turn).
+ *
+ *   0            .15                      .50                        1
+ *   |--- enter ---|--------- hold ---------|--------- exit ----------|
+ *
+ * The split is weighted toward the exit for a specific reason: the HOLD is
+ * static. Nothing moves during it, so scrolling through it quickly costs the
+ * visitor nothing - the panel is fully readable at every position. The exit
+ * is the opposite: it is entirely transient, and anything missed there is
+ * missed for good. So the exit gets the larger share even though the hold is
+ * what "feels" like the important part.
+ *
+ * At 3.2x viewport per segment (2880px at a 900px viewport) that is roughly
+ * 430px entering, 1010px settled and readable, and 1440px of exit - of which
+ * the four words get 1008px, about 250px each.
  */
-const EXIT_START = 0.72;
+const ENTER_END = 0.15;
+const EXIT_START = 0.5;
 /**
  * Where, WITHIN the exit window (x, 0-1), the content has fully compressed
  * and faded - and where the impact-word sequence is allowed to start. These
@@ -421,10 +497,15 @@ function applyExit(p: PanelRefs, x: number) {
     const start = i / n;
     const end = (i + 1) / n;
     const local = sub(wx, start, end);
+    /* Fade in fast, hold long, fade out fast. The plateau is deliberately
+       the bulk of each word's turn (0.20 -> 0.82) rather than the previous
+       0.30 -> 0.72: time spent mid-fade is time the word is present but not
+       yet properly readable, so widening the fully-opaque middle buys real
+       legibility without needing more scroll distance on top. */
     let op: number;
-    if (local <= 0.3) op = local / 0.3;
-    else if (local < 0.72) op = 1;
-    else op = 1 - (local - 0.72) / 0.28;
+    if (local <= 0.2) op = local / 0.2;
+    else if (local < 0.82) op = 1;
+    else op = 1 - (local - 0.82) / 0.18;
     const within = wx > start && wx < end ? op : 0;
     gsap.set(el, { opacity: within, scale: 0.94 + 0.06 * Math.min(1, within * 1.3) });
   });
