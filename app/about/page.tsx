@@ -4,7 +4,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { World } from "@/components/worlds/World";
 import { AboutHero } from "@/components/sections/about/AboutHero";
 import { About } from "@/components/sections/About";
-import { ProcessSpine } from "@/components/sections/about/ProcessSpine";
+import { ProcessSchedule } from "@/components/sections/about/ProcessSchedule";
 import { TechStack } from "@/components/sections/TechStack";
 import { CTABand } from "@/components/sections/CTABand";
 
@@ -32,7 +32,7 @@ export default function AboutPage() {
       <JsonLd data={breadcrumbSchema([{ name: "About", path: "/about" }])} />
       <AboutHero />
       <About showHeading={false} />
-      <ProcessSpine />
+      <ProcessSchedule />
       <TechStack />
       <CTABand
         title="Want to work with a team this size?"

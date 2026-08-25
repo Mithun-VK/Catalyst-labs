@@ -676,22 +676,31 @@
     --cursor-comic: #c0330a; /* its ember, as the offset shadow */
   }
   .cursor-layer[data-world="poster"] .cursor-shape {
-    box-shadow: 3px 3px 0 0 var(--cursor-comic);
+    box-shadow: 3px 3px 0 0
+      color-mix(in srgb, var(--cursor-comic) 55%, transparent);
   }
   .cursor-layer[data-world="poster"] .cursor-dot {
     box-shadow: none;
   }
+  /* Over a control the blob swells - but it is ~55px across and lands
+     directly on the label it is pointing at, so the FILL and the sticker
+     shadow are translucent: a solid one hid the very word being clicked.
+     The 2.5px border stays fully opaque, and that is deliberate - the
+     border is the mark's contrast guarantee (it is what the visibility
+     sweep measures), so the cursor stays clearly visible on any surface
+     while the text underneath still reads through the tint. */
   .cursor-layer[data-world="poster"] .cursor-ring[data-variant="link"] .cursor-shape {
     opacity: 1;
     transform: scale(1.85);
-    background: var(--cursor-comic);
-    box-shadow: 4px 4px 0 0 currentColor;
+    background: color-mix(in srgb, var(--cursor-comic) 28%, transparent);
+    box-shadow: 4px 4px 0 0 color-mix(in srgb, currentColor 30%, transparent);
   }
   .cursor-layer[data-world="poster"]
     .cursor-ring[data-active][data-variant="link"]
     .cursor-shape {
     transform: scale(1.55);
-    box-shadow: 2px 2px 0 0 currentColor;
+    background: color-mix(in srgb, var(--cursor-comic) 38%, transparent);
+    box-shadow: 2px 2px 0 0 color-mix(in srgb, currentColor 30%, transparent);
   }
   .cursor-layer[data-world="poster"] .cursor-tick {
     display: none;
@@ -1590,13 +1599,23 @@ body:has([data-world="system"]) {
    ========================================================================== */
 
 @layer components {
-  /* Fixed-mark overlay (the number rail) that has to stay legible over any
-     of the six flood colours behind it. `currentColor` lets one class serve
-     both text (`color`) and the plain background divs (`background-color`)
-     used for the rail line and its progress fill. */
+  /* Fixed-mark overlay (the number rail line and its progress fill) that has
+     to stay legible over any of the six flood colours behind it. These are
+     plain, textless divs, so painting a `background-color` block and
+     blending IT is correct here. */
   .number-rail-mark {
     color: #fff;
     background-color: currentColor;
+    mix-blend-mode: difference;
+  }
+
+  /* The number LABELS (01-0N) need the same colour-independent contrast, but
+     MUST NOT reuse .number-rail-mark: that class's `background-color:
+     currentColor` paints a solid block behind the glyphs in the SAME colour
+     the text itself blends to, which fully cancels the digits - readable
+     nowhere. This is text-only: colour and blend-mode, no fill. */
+  .number-rail-text {
+    color: #fff;
     mix-blend-mode: difference;
   }
 
@@ -2081,6 +2100,9 @@ body:has([data-world="system"]) {
   line-height: 0.9;
   letter-spacing: -0.045em;
   font-weight: 600;
+  /* Above the aura, which is painted into the same stacking context. */
+  position: relative;
+  z-index: 1;
 }
 
 @property --pull {
@@ -2095,6 +2117,362 @@ body:has([data-world="system"]) {
   transform: translate3d(0, calc(var(--pull, 0) * -0.14em), 0);
   transition: transform var(--duration-base) var(--ease-out-quart);
   will-change: transform;
+}
+
+@layer components {
+  /* --- ABOUT / STUDIO -----------------------------------------------------
+     The headline's entrance: each glyph rises out of the line on a stagger,
+     then the pointer-pull above takes over for the rest of the visit.
+
+     The entrance animates `translate`, NOT `transform`, and that is the
+     whole trick. `transform` on this element is already owned by the pull
+     effect; a second declaration would simply replace it and one of the two
+     would silently stop working. `translate` is a separate property that
+     COMPOSES with `transform`, so the two coexist with no arbitration and
+     no shared expression to keep in sync. */
+  @media (prefers-reduced-motion: no-preference) {
+    .studio-letter {
+      animation: cl-studio-enter 780ms var(--ease-out-quart) both;
+      animation-delay: calc(var(--i, 0) * 32ms);
+    }
+    .studio-aura {
+      transition:
+        opacity 560ms var(--ease-out-soft),
+        transform 260ms var(--ease-out-quart);
+    }
+  }
+
+  /* A warm field that follows the pointer behind the headline. The studio
+     world's brief is "warm ground and interactive type", and this is the
+     ground half of it.
+
+     It is a fixed-size circle MOVED WITH `transform`, not a gradient whose
+     position is re-declared each frame: a moving background-position
+     repaints the whole element every frame, whereas a translated layer
+     composites. Same pixels, a fraction of the cost. */
+  .studio-aura {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    width: 42rem;
+    height: 42rem;
+    margin: -21rem 0 0 -21rem;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--color-ember) 26%, transparent) 0%,
+      color-mix(in srgb, var(--color-ember) 9%, transparent) 40%,
+      transparent 68%
+    );
+    will-change: transform;
+  }
+  .studio-aura[data-on] {
+    opacity: 1;
+  }
+
+  /* The aura is 42rem across and rides the pointer, so near the right edge
+     of the headline it pushed past the viewport and produced a horizontal
+     scrollbar - measured at 1679px against a 1440px viewport.
+     The two axes need different treatment: the horizontal cut has to happen
+     (and lands on this section's own full-bleed edge, i.e. exactly the
+     viewport edge, so it is invisible), while the vertical bleed has to be
+     preserved or the glow gets sliced by a straight line across the hero.
+
+     `overflow-x: clip` is the one thing that expresses that.
+     `clip-path` was tried first and does NOT work: it is a paint-time
+     operation, so the element still contributes to scrollable overflow and
+     the scrollbar stayed (measured 1679px on a 1440px viewport either way).
+     `overflow-x: hidden` would fix the scrollbar but forces the other axis
+     to compute to `auto`, making this a scroll container and killing the
+     vertical bleed. `clip` has no such side effect and, unlike `hidden`,
+     creates no scroll container. */
+  .about-hero {
+    overflow-x: clip;
+  }
+
+  /* --- PROCESS: THE SCHEDULE ----------------------------------------------
+     The about page's process section is a schedule, not a list of stages.
+     Each stage owns a bar on a shared week axis, positioned and sized by the
+     REAL range in its own copy - so Discover and Architect overlap the way
+     they do in an actual engagement, and Build runs off the right edge
+     because it has no stated end. Five equal blocks would have been easier
+     to draw and would have pictured a process nobody here runs.
+
+     One mechanism drives all of it: scroll. A playhead crosses the sticky
+     ruler as the section is read, each bar draws itself left to right as its
+     row arrives, and finished bars STAY drawn - the schedule accumulates
+     behind the reader rather than resetting.
+
+     No JavaScript. The section is a server component, every animation is a
+     scroll-driven CSS timeline, and the un-animated state is the FINISHED
+     state: bars fully drawn, playhead parked at the end. Reduced motion and
+     browsers without `animation-timeline` therefore get a complete, readable
+     schedule instead of an empty grid waiting for an event that never
+     arrives. */
+  .schedule {
+    /* The gutter carries each stage's key - its number and its duration -
+       and is the one measurement the ruler and all five rows share, so the
+       week axis starts at exactly the same x on every one of them. */
+    --sched-gutter: 7rem;
+    view-timeline-name: --schedule;
+    view-timeline-axis: block;
+  }
+
+  /* The timeline is named on the ROW rather than left as an anonymous
+     `view()` on each part. An anonymous timeline measures the ANIMATED
+     element, and a bar is 8px tall - it would take a few pixels of scroll as
+     its entire range and snap instead of drawing. One named timeline per row
+     gives every part of that row the same readable range, which is also what
+     keeps them in step with each other. */
+  .sched-stage {
+    view-timeline-name: --stage;
+    view-timeline-axis: block;
+  }
+
+  /* The axis itself: four week columns and the open region, drawn as
+     hairlines rather than as a chart's gridlines. This system separates with
+     rules, never with fills. */
+  .sched-track {
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--color-line) 0 1px,
+      transparent 1px 20%
+    );
+  }
+
+  .sched-bar {
+    transform-origin: left center;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-ember) 40%, transparent),
+      color-mix(in srgb, var(--color-ember) 78%, transparent)
+    );
+    /* The leading edge is the only SOLID ember in the bar, and the only thing
+       that glows: it reads as the point the work reaches rather than as a
+       filled cell in a chart. */
+    box-shadow:
+      inset -3px 0 0 0 var(--color-ember),
+      0 0 22px -4px color-mix(in srgb, var(--color-ember) 55%, transparent);
+  }
+
+  /* Build and Launch are not given an end date they do not have: no leading
+     edge, and the fill dissolves before the axis runs out. */
+  .sched-bar[data-open="true"] {
+    box-shadow: none;
+    mask-image: linear-gradient(90deg, #000 55%, transparent);
+  }
+
+  /* Ongoing is not a duration at all. Ticked rather than filled, so it reads
+     as a rhythm that continues past the edge of the drawing. */
+  .sched-bar[data-ticked="true"] {
+    background: repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-ember) 78%, transparent) 0 3px,
+      transparent 3px 9px
+    );
+  }
+
+  /* The week grid runs on behind the row it belongs to, not just under its
+     bar, so each stage is read ON the schedule rather than beside it. Faded
+     out before it reaches the body copy - it is a field, not a table.
+
+     Drawn on a pseudo-element rather than as the element's own background
+     because the fade is a mask, and a mask on the element would take the
+     text down with it. `isolation` keeps the z-index: -1 inside this row
+     instead of dropping it behind the page ground. */
+  .sched-field {
+    position: relative;
+    isolation: isolate;
+  }
+
+  @media (width >= 64rem) {
+    .sched-field::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-image: repeating-linear-gradient(
+        to right,
+        var(--color-line) 0 1px,
+        transparent 1px 20%
+      );
+      mask-image: linear-gradient(to bottom, #000 0 26%, transparent 76%);
+    }
+  }
+
+  .sched-num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(1.375rem, 1rem + 1.1vw, 2rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--color-mute-deep);
+  }
+
+  /* The playhead spans the FULL width of the axis and carries its mark as a
+     pseudo-element, so translating it 0 -> 100% moves the mark by exactly one
+     axis width. Nothing has to measure anything for the two to agree. */
+  .sched-playhead {
+    position: absolute;
+    inset: 0;
+    /* Parked at the end: at rest this is a finished project. */
+    transform: translateX(100%);
+    will-change: transform;
+  }
+  .sched-playhead::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: -0.5rem;
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-ember) 12%, transparent),
+      var(--color-ember)
+    );
+  }
+  .sched-playhead::after {
+    content: "";
+    position: absolute;
+    left: -3px;
+    bottom: -0.5rem;
+    width: 7px;
+    height: 7px;
+    margin-bottom: -3px;
+    border-radius: 999px;
+    background: var(--color-ember);
+    box-shadow: 0 0 14px 3px
+      color-mix(in srgb, var(--color-ember) 55%, transparent);
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .sched-playhead {
+        animation: cl-sched-playhead linear both;
+        animation-timeline: --schedule;
+        animation-range: contain 0% contain 100%;
+      }
+
+      /* The bar draws as its row arrives and then stays drawn: it is the
+         record of a stage that has been read, not an entrance effect. */
+      .sched-bar {
+        animation: cl-sched-draw linear both;
+        animation-timeline: --stage;
+        animation-range: entry 25% cover 44%;
+      }
+
+      /* Opacity is a reading STATE here, not a fade-in - the row being read
+         is the one at full strength. The bars are deliberately left out of
+         it so the schedule drawn so far stays visible. */
+      .sched-detail,
+      .sched-key {
+        animation: cl-sched-focus linear both;
+        animation-timeline: --stage;
+        animation-range: entry 5% exit 95%;
+      }
+
+      /* The key lights when its own bar starts drawing, and stays lit. */
+      .sched-num {
+        animation: cl-sched-key linear both;
+        animation-timeline: --stage;
+        animation-range: entry 25% cover 40%;
+      }
+    }
+  }
+
+  /* A belief card. The accent is an INSET shadow rather than a real border
+     or a width change, so picking one out costs no layout - a hover that
+     reflows the text it is highlighting is worse than no hover at all.
+
+     The hover BACKGROUND is not set here: the card's resting fill comes from
+     the `bg-ink` utility, and Tailwind's utilities layer outranks this one
+     no matter how specific a `:hover` selector gets. It is applied with a
+     `hover:bg-ink-raised` utility at the call site instead, so both states
+     live in the same layer and the later one simply wins. */
+  .belief-card {
+    transition:
+      background-color var(--duration-base) var(--ease-out-soft),
+      box-shadow var(--duration-base) var(--ease-out-soft);
+  }
+  .belief-card:hover {
+    box-shadow: inset 2px 0 0 0 var(--color-ember);
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .spine-run {
+        transform: scaleY(0);
+        animation: cl-spine-draw linear both;
+        animation-timeline: --spine-item;
+        animation-range: entry 18% cover 42%;
+      }
+      .spine-node {
+        animation: cl-spine-node linear both;
+        animation-timeline: --spine-item;
+        animation-range: entry 12% cover 26%;
+      }
+    }
+  }
+}
+
+@keyframes cl-studio-enter {
+  from {
+    opacity: 0;
+    translate: 0 0.62em;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes cl-sched-playhead {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes cl-sched-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* The reading state. Never reaches 0: an unread stage is still legible, it
+   is simply not the one being read. */
+@keyframes cl-sched-focus {
+  0% {
+    opacity: 0.34;
+  }
+  26% {
+    opacity: 1;
+  }
+  74% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.34;
+  }
+}
+
+@keyframes cl-sched-key {
+  from {
+    color: var(--color-mute-deep);
+  }
+  to {
+    color: var(--color-ember);
+  }
 }
 
 /* Stagger indices are assigned in CSS rather than by cloning children in JS.

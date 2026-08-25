@@ -1,5 +1,6 @@
 import { CompactHeading, Section, SectionHeading } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
+import { Stagger } from "@/components/motion/TextReveal";
 import { site } from "@/lib/site";
 
 const beliefs = [
@@ -51,7 +52,8 @@ export function About({ showHeading = true }: { showHeading?: boolean }) {
 
       <div className={`container-page ${showHeading ? "mt-14" : "mt-10"}`}>
         <div className="grid gap-x-(--space-gutter) gap-y-12 lg:grid-cols-12">
-          <Reveal className="lg:col-span-7">
+          <div className="lg:col-span-7">
+            <Reveal>
             <div className="max-w-2xl space-y-6 text-lead text-mute">
               <p>
                 {site.name} builds custom software, AI systems and automation for
@@ -73,10 +75,22 @@ export function About({ showHeading = true }: { showHeading?: boolean }) {
                 answerable for the result rather than for a deliverable.
               </p>
             </div>
+            </Reveal>
 
-            <ul className="mt-12 grid gap-px border border-line bg-line sm:grid-cols-2">
+            {/* The four beliefs cascade in one at a time rather than landing
+                as a block - they are four separate claims and read better
+                arriving as four. Each is its own card on hover, which is the
+                only interactive affordance in this column. */}
+            <Stagger
+              as="ul"
+              step={4}
+              className="mt-12 grid gap-px border border-line bg-line sm:grid-cols-2"
+            >
               {beliefs.map((belief) => (
-                <li key={belief.title} className="bg-ink p-6">
+                <li
+                  key={belief.title}
+                  className="belief-card bg-ink p-6 hover:bg-ink-raised"
+                >
                   <h3 className="flex gap-3 text-body font-medium text-paper">
                     <span
                       aria-hidden="true"
@@ -87,8 +101,8 @@ export function About({ showHeading = true }: { showHeading?: boolean }) {
                   <p className="mt-3 pl-7 text-small text-mute">{belief.body}</p>
                 </li>
               ))}
-            </ul>
-          </Reveal>
+            </Stagger>
+          </div>
 
           {/* Verifiable facts only. */}
           <Reveal delay={90} className="lg:col-span-5 lg:justify-self-end">

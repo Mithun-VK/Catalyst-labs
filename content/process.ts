@@ -5,11 +5,32 @@ export type ProcessStage = {
   body: string;
   /** What you actually receive at the end of the stage. */
   output: string[];
+  /**
+   * Where the stage sits on the shared week axis used by the about page's
+   * schedule: 0 is day one, 1 is the end of week one, and SCHEDULE_SPAN is
+   * the open right edge. These are read off the `duration` strings above -
+   * they are layout, not copy - and they OVERLAP on purpose, because the
+   * stages do. Architect starts while Discover is still closing.
+   */
+  start: number;
+  end: number;
+  /**
+   * No stated end date. Drawn running past the edge of the axis rather than
+   * being given a finish line the engagement does not actually have.
+   */
+  open?: boolean;
+  /** Ongoing is a rhythm rather than a duration: ticked, not filled. */
+  ticked?: boolean;
 };
+
+/** The full width of the week axis, in the same units as start/end. */
+export const SCHEDULE_SPAN = 5;
 
 export const processStages: ProcessStage[] = [
   {
     index: "01",
+    start: 0,
+    end: 1,
     title: "Discover",
     duration: "Days 1–5",
     body:
@@ -23,6 +44,8 @@ export const processStages: ProcessStage[] = [
   },
   {
     index: "02",
+    start: 0.75,
+    end: 2,
     title: "Architect",
     duration: "Week 1–2",
     body:
@@ -36,6 +59,8 @@ export const processStages: ProcessStage[] = [
   },
   {
     index: "03",
+    start: 1.75,
+    end: 3,
     title: "Design",
     duration: "Week 2–3",
     body:
@@ -49,6 +74,9 @@ export const processStages: ProcessStage[] = [
   },
   {
     index: "04",
+    start: 2.75,
+    end: 5,
+    open: true,
     title: "Build",
     duration: "Week 3 onward",
     body:
@@ -62,6 +90,10 @@ export const processStages: ProcessStage[] = [
   },
   {
     index: "05",
+    start: 4,
+    end: 5,
+    open: true,
+    ticked: true,
     title: "Launch & Improve",
     duration: "Ongoing",
     body:

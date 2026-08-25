@@ -13,29 +13,43 @@ import { ProjectNumberNav } from "@/components/sections/work/showcase/ProjectNum
  * Pins the viewport for one scroll pass across every project: each panel
  * enters (colour field wipes clear, then number/meta/title/visual/proof/tech
  * cascade in), holds, then compresses while a brief BUILT./TESTED./
- * DEPLOYED./LIVE. sequence plays, before the next panel's turn begins. The
- * whole thing is driven by ONE ScrollTrigger with `scrub`, so it is scroll
- * POSITION, not time - the visitor sets the pace by how fast they scroll,
- * and scrolling back up runs every stage in exact reverse.
+ * DEPLOYED./LIVE. sequence plays, before the next panel's turn begins.
  *
  * ARCHITECTURE. React only ever renders the markup (ProjectPanel,
  * ProjectNumberNav) - see those files for the `data-role` / `data-gsap`
  * contract. This file's job is purely to read the current scroll progress
- * and WRITE values onto that markup with gsap.set(); nothing here is a
- * timeline or a tween, so a rapid scroll flick never leaves an animation
- * "still catching up" - every frame is computed fresh from
- * `ScrollTrigger`'s own progress, which is what makes fast/slow/reverse
- * scrolling all correct for free.
+ * and WRITE values onto that markup every frame.
  *
- * GATING. `ScrollTrigger.matchMedia` runs this ENTIRE setup only under
+ * PERFORMANCE. The per-frame path (applyProgress -> setPanelActive ->
+ * applyEnter/applyVisual/applyExit) writes DIRECTLY to `element.style`
+ * instead of calling `gsap.set()`. This is deliberate, not a style
+ * preference: every value here is already hand-computed from scroll
+ * progress, so gsap.set()'s job on each call - parsing the vars object,
+ * resolving each property through GSAP's CSS plugin, normalizing units - is
+ * pure overhead with nothing behind it to justify the cost, multiplied by
+ * every property on every element, every frame. `gsap` itself is still used
+ * for what it is actually good at: ScrollTrigger's pin/scroll-distance
+ * math, and the couple of one-time setup calls below that never run in the
+ * hot path. Two more choices follow from the same goal:
+ *   - `clip-path` reveals (the colour-field mask, the screenshot wipe) are
+ *     `transform: translate3d()` curtains instead - clip-path forces a
+ *     repaint of the clipped region on every change; translate3d is
+ *     compositor-only.
+ *   - Panels and number-rail items that are NOT the active one are only
+ *     touched on the FRAME THE ACTIVE INDEX CHANGES (see `activeState`
+ *     below), not every frame - there is no reason to re-write "opacity: 0"
+ *     to five idle panels sixty times a second.
+ * Together these are what keep a fast scroll flick from dropping frames:
+ * the earlier version measurably fell behind (visible stutter) once the
+ * catch-up loop below was running continuously during a flick, which is
+ * exactly the condition that turns per-frame cost from "fine" into "lag".
+ *
+ * GATING. `gsap.matchMedia` runs this ENTIRE setup only under
  * `(min-width: 1024px) and (prefers-reduced-motion: no-preference)`. Outside
  * that - on a narrower viewport (this component is hidden there anyway, see
  * app/work/page.tsx) or with reduced motion requested - none of this ever
  * executes, and the panels stay in their default server-rendered state:
- * ordinary block-level sections, fully visible, in document order. matchMedia
- * also handles the live case of the query starting or stopping matching
- * (a resize crossing 1024px, or the OS reduced-motion toggle changing) by
- * automatically reverting everything this function sets up.
+ * ordinary block-level sections, fully visible, in document order.
  */
 export function WorksShowcase({ projects }: { projects: Project[] }) {
   const sectionRef = useRef<HTMLElement>(null);
@@ -49,20 +63,59 @@ export function WorksShowcase({ projects }: { projects: Project[] }) {
     const pin = pinRef.current;
     if (!section || !pin) return;
 
+    // Queried once, unconditionally - both the pinned setup below AND the
+    // number-rail click handling need these regardless of which matchMedia
+    // branch is currently active (or whether either is: a click still has to
+    // work under reduced motion, where the pin never engages).
+    const panelEls = gsap.utils.toArray<HTMLElement>("[data-panel]", section);
+    const numberItems = gsap.utils.toArray<HTMLElement>("[data-number-item]", section);
+
+    /* ---- number-rail navigation --------------------------------------
+       `pinState.trigger` is only non-null while the pinned ScrollTrigger
+       below is alive, so a click always knows which scroll math applies:
+       pinned (jump within the pin's own scroll track, computed the same
+       way the track itself was built) or plain document flow (reduced
+       motion / narrower than 1024px, where each panel just sits in normal
+       flow and a native scroll-into-view is correct). Both branches use an
+       INSTANT jump, not a smooth one: within the pin, the section's own
+       position never moves (that is what pinning means) - only which
+       project is active changes, and the render loop's own catch-up easing
+       (below) already animates that landing exactly as it would for a fast
+       manual scroll. A native smooth-scroll running at the same time would
+       just be a second, competing easing curve on top of that. */
+    const pinState: { trigger: ScrollTrigger | null } = { trigger: null };
+
+    const scrollToProject = (index: number) => {
+      const trigger = pinState.trigger;
+      if (trigger) {
+        const segment = (trigger.end - trigger.start) / panelEls.length;
+        // Lands mid-hold (see the SEGMENT BUDGET note below) rather than
+        // exactly at the project's first frame, so it opens already settled
+        // and readable instead of mid-entrance.
+        const target = trigger.start + index * segment + segment * 0.32;
+        window.scrollTo(0, target);
+      } else {
+        panelEls[index]?.scrollIntoView({ behavior: "auto", block: "start" });
+      }
+    };
+
+    const numberClickHandlers = numberItems.map((el, i) => {
+      const handler = () => scrollToProject(i);
+      el.addEventListener("click", handler);
+      return handler;
+    });
+
     const mm = gsap.matchMedia();
     mm.add(
       "(min-width: 1024px) and (prefers-reduced-motion: no-preference)",
       () => {
-        const panelEls = gsap.utils.toArray<HTMLElement>("[data-panel]", section);
         const panels = panelEls.map(buildPanelRefs);
-        const numberItems = gsap.utils.toArray<HTMLElement>(
-          "[data-number-item]",
-          section
-        );
         const progressLine = section.querySelector<HTMLElement>(
           "[data-progress-line]"
         );
+        const activeState = { index: -1 };
 
+        // One-time setup only - none of this runs again in the hot path.
         gsap.set(pin, { position: "relative", height: "100vh", overflow: "hidden" });
 
         panels.forEach((p) => {
@@ -72,9 +125,14 @@ export function WorksShowcase({ projects }: { projects: Project[] }) {
             opacity: 0,
             pointerEvents: "none",
           });
-          p.glyphPoints.forEach((pt) =>
-            gsap.set(pt, { transformOrigin: "50% 50%", transformBox: "fill-box" })
-          );
+          if (p.contentWrap) p.contentWrap.style.transformOrigin = "top center";
+          // Opaque only here - see the opacity-0 default on the curtain
+          // itself in ProjectVisual.tsx for why that default exists.
+          if (p.imageCurtain) p.imageCurtain.style.opacity = "1";
+          p.glyphPoints.forEach((pt) => {
+            pt.style.transformOrigin = "50% 50%";
+            pt.style.transformBox = "fill-box";
+          });
         });
 
         /* ---- catch-up smoothing -------------------------------------
@@ -88,10 +146,8 @@ export function WorksShowcase({ projects }: { projects: Project[] }) {
 
            It has to be done by hand. `scrub` does NOT do this here: scrub
            smooths the playhead of an ATTACHED animation, and this component
-           has none - it reads `self.progress` and writes with gsap.set().
-           `self.progress` is the raw scroll position and is never scrubbed,
-           so the previous `scrub: 1.4` bought no smoothing whatever; the
-           progress line was measured tracking scrollY perfectly linearly.
+           has none - it reads `self.progress` and writes styles directly.
+           `self.progress` is the raw scroll position and is never scrubbed.
 
            Lag is proportional to scroll velocity, which is the point: at a
            normal reading pace the rendered value sits right on the scroll
@@ -121,13 +177,13 @@ export function WorksShowcase({ projects }: { projects: Project[] }) {
              nothing. */
           if (Math.abs(delta) < 0.0001) {
             renderP = targetP;
-            applyProgress(renderP, panels, numberItems, progressLine);
+            applyProgress(renderP, panels, numberItems, progressLine, activeState);
             raf = 0;
             return;
           }
           const step = delta * SMOOTH;
           renderP += Math.max(-MAX_STEP, Math.min(MAX_STEP, step));
-          applyProgress(renderP, panels, numberItems, progressLine);
+          applyProgress(renderP, panels, numberItems, progressLine, activeState);
           raf = requestAnimationFrame(render);
         };
         const kick = () => {
@@ -141,15 +197,13 @@ export function WorksShowcase({ projects }: { projects: Project[] }) {
           // narrowest thing on the track rather than by feel: each transition
           // word has to stay legible for longer than one wheel tick (~100px),
           // or a single ordinary scroll gesture steps straight over one and
-          // the visitor never sees it. At 2.6x each word was legible for a
-          // MEASURED 80px - narrower than that tick, which is precisely why
-          // words went missing when scrolling quickly. See the budget note
-          // above EXIT_START for how a segment is divided.
+          // the visitor never sees it. See the budget note above EXIT_START
+          // for how a segment is divided.
           end: () => "+=" + panels.length * window.innerHeight * 3.2,
           pin,
           /* Deliberately NO `scrub`. It smooths an attached animation's
-             playhead; with an onUpdate/gsap.set implementation like this one
-             it changes nothing except which tick onUpdate fires on. The
+             playhead; with a direct-write implementation like this one it
+             changes nothing except which tick onUpdate fires on. The
              catch-up easing this section needs is the `render` loop above,
              which is real and measurable. */
           anticipatePin: 1,
@@ -163,16 +217,22 @@ export function WorksShowcase({ projects }: { projects: Project[] }) {
         // ease-in from zero.
         targetP = trigger.progress;
         renderP = trigger.progress;
-        applyProgress(renderP, panels, numberItems, progressLine);
+        applyProgress(renderP, panels, numberItems, progressLine, activeState);
+
+        pinState.trigger = trigger;
 
         return () => {
+          pinState.trigger = null;
           if (raf) cancelAnimationFrame(raf);
           trigger.kill();
         };
       }
     );
 
-    return () => mm.revert();
+    return () => {
+      mm.revert();
+      numberItems.forEach((el, i) => el.removeEventListener("click", numberClickHandlers[i]));
+    };
   }, [projects]);
 
   return (
@@ -181,7 +241,7 @@ export function WorksShowcase({ projects }: { projects: Project[] }) {
         Selected projects
       </h2>
       <div ref={pinRef} className="relative min-h-screen">
-        <ProjectNumberNav count={projects.length} />
+        <ProjectNumberNav projects={projects} />
         {projects.map((project, i) => (
           <ProjectPanel key={project.slug} project={project} index={i} />
         ))}
@@ -199,6 +259,9 @@ type MetricRowRef = {
   valueEl: HTMLElement | null;
   target: number;
   decimals: number;
+  /** Last string written - skips the DOM write (and text reflow) on frames
+      where the rounded display value hasn't actually changed. */
+  lastText: string;
 };
 
 type PanelRefs = {
@@ -212,6 +275,7 @@ type PanelRefs = {
   visualRoot: HTMLElement | null;
   frame: HTMLElement | null;
   image: HTMLElement | null;
+  imageCurtain: HTMLElement | null;
   ringOuter: HTMLElement | null;
   ringSweep: HTMLElement | null;
   glyphGrid: HTMLElement | null;
@@ -238,6 +302,7 @@ function buildPanelRefs(root: HTMLElement): PanelRefs {
         valueEl,
         target: valueEl ? Number(valueEl.dataset.target) : 0,
         decimals: valueEl ? Number(valueEl.dataset.decimals) : 0,
+        lastText: valueEl?.textContent ?? "",
       };
     });
 
@@ -252,6 +317,7 @@ function buildPanelRefs(root: HTMLElement): PanelRefs {
     visualRoot: root.querySelector('[data-role="visual"]'),
     frame: root.querySelector('[data-gsap="frame"]'),
     image: root.querySelector('[data-gsap="image"]'),
+    imageCurtain: root.querySelector('[data-gsap="image-curtain"]'),
     ringOuter: root.querySelector('[data-gsap="ring-outer"]'),
     ringSweep: root.querySelector('[data-gsap="ring-sweep"]'),
     glyphGrid: root.querySelector('[data-gsap="glyph-grid"]'),
@@ -271,6 +337,9 @@ function buildPanelRefs(root: HTMLElement): PanelRefs {
 
 /* ==========================================================================
    Frame-by-frame progress application
+   --------------------------------------------------------------------------
+   Every function below writes to `element.style` directly - see the
+   PERFORMANCE note on WorksShowcase for why. None of it uses gsap.set().
    ========================================================================== */
 
 /*
@@ -296,10 +365,7 @@ const EXIT_START = 0.5;
  * Where, WITHIN the exit window (x, 0-1), the content has fully compressed
  * and faded - and where the impact-word sequence is allowed to start. These
  * are deliberately non-overlapping: content must be fully gone (opacity 0)
- * before the first word is allowed to appear. They used to share the same
- * 0-1 range, so a word like "TESTED." rendered on top of description text
- * and tech pills that were only half faded - readable as visual noise, not
- * a clean transition.
+ * before the first word is allowed to appear.
  */
 const CONTENT_CLEAR = 0.22;
 const WORDS_START = 0.3;
@@ -321,7 +387,8 @@ function applyProgress(
   progress: number,
   panels: PanelRefs[],
   numberItems: HTMLElement[],
-  progressLine: HTMLElement | null
+  progressLine: HTMLElement | null,
+  activeState: { index: number }
 ) {
   const N = panels.length;
   if (N === 0) return;
@@ -331,24 +398,37 @@ function applyProgress(
   const active = Math.min(N - 1, Math.floor(floatIndex));
   const t = clamp01(floatIndex - active);
 
+  // The active panel's own content changes every frame - that part always
+  // runs. Everyone else only needs a write on the frame `active` actually
+  // changes; re-setting "opacity: 0" on five idle panels sixty times a
+  // second is pure waste once this loop is running continuously (see the
+  // catch-up loop in WorksShowcase).
+  const indexChanged = active !== activeState.index;
+
   panels.forEach((p, i) => {
     if (i === active) {
       setPanelActive(p, t);
-    } else {
-      gsap.set(p.root, { opacity: 0, pointerEvents: "none" });
+    } else if (indexChanged) {
+      p.root.style.opacity = "0";
+      p.root.style.pointerEvents = "none";
     }
   });
 
-  numberItems.forEach((el, i) => {
-    const isActive = i === active;
-    gsap.set(el, { opacity: isActive ? 1 : 0.4, scale: isActive ? 1.35 : 1 });
-  });
+  if (indexChanged) {
+    numberItems.forEach((el, i) => {
+      const isActive = i === active;
+      el.style.opacity = isActive ? "1" : "0.4";
+      el.style.transform = `scale(${isActive ? 1.35 : 1})`;
+    });
+    activeState.index = active;
+  }
 
-  if (progressLine) gsap.set(progressLine, { height: `${overall * 100}%` });
+  if (progressLine) progressLine.style.transform = `scaleY(${overall})`;
 }
 
 function setPanelActive(p: PanelRefs, t: number) {
-  gsap.set(p.root, { opacity: 1, pointerEvents: "auto" });
+  p.root.style.opacity = "1";
+  p.root.style.pointerEvents = "auto";
 
   if (t <= ENTER_END) {
     applyEnter(p, easeOut(sub(t, 0, ENTER_END)));
@@ -364,87 +444,101 @@ function setPanelActive(p: PanelRefs, t: number) {
 
 /** e: 0 = not yet entered, 1 = fully settled. */
 function applyEnter(p: PanelRefs, e: number) {
-  if (p.mask) gsap.set(p.mask, { clipPath: `inset(0 ${e * 100}% 0 0)` });
+  if (p.mask) p.mask.style.transform = `translate3d(${e * 100}%, 0, 0)`;
 
   if (p.number) {
     const eNum = sub(e, 0.05, 0.55);
-    gsap.set(p.number, { opacity: eNum, x: -40 * (1 - eNum), scale: 1.15 - 0.15 * eNum });
+    p.number.style.opacity = String(eNum);
+    p.number.style.transform = `translate3d(${-40 * (1 - eNum)}px, 0, 0) scale(${1.15 - 0.15 * eNum})`;
   }
 
   if (p.meta) {
     const eMeta = sub(e, 0.15, 0.65);
-    gsap.set(p.meta, { opacity: eMeta, y: 12 * (1 - eMeta) });
+    p.meta.style.opacity = String(eMeta);
+    p.meta.style.transform = `translate3d(0, ${12 * (1 - eMeta)}px, 0)`;
   }
 
   const eTitle = sub(e, 0.2, 0.85);
-  if (p.titleInner) gsap.set(p.titleInner, { y: `${(1 - eTitle) * 100}%` });
+  if (p.titleInner) p.titleInner.style.transform = `translate3d(0, ${(1 - eTitle) * 100}%, 0)`;
   if (p.titleGhost) {
     const eGhost = sub(e, 0.75, 1);
     const gate = clamp01(eTitle * 8);
-    gsap.set(p.titleGhost, {
-      opacity: (1 - eGhost) * 0.5 * gate,
-      x: (1 - eGhost) * -2,
-      y: (1 - eGhost) * 2,
-    });
+    p.titleGhost.style.opacity = String((1 - eGhost) * 0.5 * gate);
+    p.titleGhost.style.transform = `translate3d(${(1 - eGhost) * -2}px, ${(1 - eGhost) * 2}px, 0)`;
   }
 
   applyVisual(p, sub(e, 0.3, 1));
 
   if (p.description) {
     const eDesc = sub(e, 0.4, 0.9);
-    gsap.set(p.description, { opacity: eDesc, y: 20 * (1 - eDesc) });
+    p.description.style.opacity = String(eDesc);
+    p.description.style.transform = `translate3d(0, ${20 * (1 - eDesc)}px, 0)`;
   }
 
   p.metricRows.forEach((row, i) => {
     const eRow = sub(e, 0.45 + i * 0.08, 0.85 + i * 0.08);
-    gsap.set(row.el, { opacity: eRow, y: 10 * (1 - eRow) });
-    if (row.valueEl) row.valueEl.textContent = (row.target * eRow).toFixed(row.decimals);
+    row.el.style.opacity = String(eRow);
+    row.el.style.transform = `translate3d(0, ${10 * (1 - eRow)}px, 0)`;
+    if (row.valueEl) {
+      const text = (row.target * eRow).toFixed(row.decimals);
+      if (text !== row.lastText) {
+        row.valueEl.textContent = text;
+        row.lastText = text;
+      }
+    }
   });
 
   p.techPills.forEach((el, i) => {
     const eP = sub(e, 0.55 + i * 0.04, 0.85 + i * 0.04);
-    gsap.set(el, { opacity: eP, y: 6 * (1 - eP) });
+    el.style.opacity = String(eP);
+    el.style.transform = `translate3d(0, ${6 * (1 - eP)}px, 0)`;
   });
 
   if (p.cta) {
     const eCta = sub(e, 0.8, 1);
-    gsap.set(p.cta, { opacity: eCta, y: 10 * (1 - eCta) });
+    p.cta.style.opacity = String(eCta);
+    p.cta.style.transform = `translate3d(0, ${10 * (1 - eCta)}px, 0)`;
   }
 
   if (p.liveStamp) {
     const eStamp = sub(e, 0.82, 1);
-    gsap.set(p.liveStamp, {
-      opacity: eStamp,
-      scale: 1.15 - 0.15 * eStamp,
-      rotate: -3 + 3 * eStamp,
-    });
+    p.liveStamp.style.opacity = String(eStamp);
+    p.liveStamp.style.transform = `scale(${1.15 - 0.15 * eStamp}) rotate(${-3 + 3 * eStamp}deg)`;
   }
 }
 
 /** e: 0 = not yet visible, 1 = fully revealed - shared by every visual type. */
 function applyVisual(p: PanelRefs, e: number) {
-  if (p.visualRoot) gsap.set(p.visualRoot, { opacity: e, scale: 0.94 + 0.06 * e });
+  if (p.visualRoot) {
+    p.visualRoot.style.opacity = String(e);
+    p.visualRoot.style.transform = `scale(${0.94 + 0.06 * e})`;
+  }
 
-  // Browser-frame projects: the screenshot wipes in left-to-right.
-  if (p.image) gsap.set(p.image, { clipPath: `inset(0 0 0 ${(1 - e) * 100}%)` });
+  // Browser-frame projects: a solid curtain slides clear left-to-right,
+  // revealing the (always fully rendered, never clipped) screenshot beneath.
+  if (p.imageCurtain) p.imageCurtain.style.transform = `translate3d(${e * 100}%, 0, 0)`;
 
   // Planet-badge projects: outer ring, sweep, grid, then the signature path.
-  if (p.ringOuter) gsap.set(p.ringOuter, { opacity: 0.15 * clamp01(e * 1.4) });
-  if (p.ringSweep) gsap.set(p.ringSweep, { opacity: 0.28 * sub(e, 0.2, 1) });
-  if (p.glyphGrid) gsap.set(p.glyphGrid, { opacity: 0.18 * sub(e, 0.15, 0.65) });
+  if (p.ringOuter) p.ringOuter.style.opacity = String(0.15 * clamp01(e * 1.4));
+  if (p.ringSweep) p.ringSweep.style.opacity = String(0.28 * sub(e, 0.2, 1));
+  if (p.glyphGrid) p.glyphGrid.style.opacity = String(0.18 * sub(e, 0.15, 0.65));
 
   if (p.glyphPaths.length) {
     const eDraw = sub(e, 0.35, 1);
     const n = p.glyphPaths.length;
     p.glyphPaths.forEach((path, i) => {
       const local = clamp01(eDraw * n - i);
-      gsap.set(path, { strokeDasharray: 1, strokeDashoffset: 1 - local });
+      path.style.strokeDasharray = "1";
+      path.style.strokeDashoffset = String(1 - local);
     });
   }
 
   if (p.glyphPoints.length) {
     const ePoint = sub(e, 0.85, 1);
-    p.glyphPoints.forEach((pt) => gsap.set(pt, { opacity: ePoint, scale: 0.4 + 0.6 * ePoint }));
+    p.glyphPoints.forEach((pt) => {
+      pt.style.opacity = String(ePoint);
+      pt.style.transform = `scale(${0.4 + 0.6 * ePoint})`;
+    });
   }
 }
 
@@ -465,26 +559,23 @@ function applyVisual(p: PanelRefs, e: number) {
  */
 function applyExit(p: PanelRefs, x: number) {
   const eContent = easeOut(sub(x, 0, CONTENT_CLEAR));
-  if (p.contentWrap)
-    gsap.set(p.contentWrap, {
-      scaleY: 1 - 0.92 * eContent,
-      opacity: 1 - eContent,
-      transformOrigin: "top center",
-    });
+  if (p.contentWrap) {
+    p.contentWrap.style.opacity = String(1 - eContent);
+    p.contentWrap.style.transform = `scaleY(${1 - 0.92 * eContent})`;
+  }
 
   // A brief engineering pulse while the content is compressing away - fully
   // faded out again before WORDS_START, never sharing the stage with a word.
   if (p.blueprint) {
     const bpWindow = sub(x, 0, WORDS_START * 0.85);
     const bpOp = bpWindow < 0.5 ? bpWindow / 0.5 : 1 - (bpWindow - 0.5) / 0.5;
-    gsap.set(p.blueprint, { opacity: bpOp * 0.85 });
-    if (p.blueprintPath)
-      gsap.set(p.blueprintPath, {
-        strokeDasharray: 1,
-        strokeDashoffset: 1 - sub(x, 0, WORDS_START * 0.7),
-      });
+    p.blueprint.style.opacity = String(bpOp * 0.85);
+    if (p.blueprintPath) {
+      p.blueprintPath.style.strokeDasharray = "1";
+      p.blueprintPath.style.strokeDashoffset = String(1 - sub(x, 0, WORDS_START * 0.7));
+    }
     p.blueprintLabels.forEach((el, i) => {
-      gsap.set(el, { opacity: sub(x, i * 0.04, i * 0.04 + 0.2) * bpOp });
+      el.style.opacity = String(sub(x, i * 0.04, i * 0.04 + 0.2) * bpOp);
     });
   }
 
@@ -498,15 +589,16 @@ function applyExit(p: PanelRefs, x: number) {
     const end = (i + 1) / n;
     const local = sub(wx, start, end);
     /* Fade in fast, hold long, fade out fast. The plateau is deliberately
-       the bulk of each word's turn (0.20 -> 0.82) rather than the previous
-       0.30 -> 0.72: time spent mid-fade is time the word is present but not
-       yet properly readable, so widening the fully-opaque middle buys real
-       legibility without needing more scroll distance on top. */
+       the bulk of each word's turn (0.20 -> 0.82): time spent mid-fade is
+       time the word is present but not yet properly readable, so widening
+       the fully-opaque middle buys real legibility without needing more
+       scroll distance on top. */
     let op: number;
     if (local <= 0.2) op = local / 0.2;
     else if (local < 0.82) op = 1;
     else op = 1 - (local - 0.82) / 0.18;
     const within = wx > start && wx < end ? op : 0;
-    gsap.set(el, { opacity: within, scale: 0.94 + 0.06 * Math.min(1, within * 1.3) });
+    el.style.opacity = String(within);
+    el.style.transform = `scale(${0.94 + 0.06 * Math.min(1, within * 1.3)})`;
   });
 }

@@ -112,7 +112,6 @@ export function CustomCursor() {
     let frame = 0;
     let lastTarget: Element | null = null;
     let magnetEl: Element | null = null;
-    let recheck = 0;
 
     const tick = () => {
       // Where the reticle wants to be: the pointer, pulled toward the centre
@@ -219,14 +218,6 @@ export function CustomCursor() {
       }
 
       evaluateContrast(target);
-
-      /* A surface can CHANGE COLOUR under a stationary pointer: the nav CTA
-         fills with the accent on hover, which is the exact moment an
-         accent-coloured cursor would disappear into it. The reading above
-         happens on the frame the pointer arrives, before that transition has
-         run, so take a second reading once it has settled. */
-      window.clearTimeout(recheck);
-      recheck = window.setTimeout(() => evaluateContrast(target), 320);
     };
 
     const onDown = () => ring.setAttribute("data-active", "");
@@ -238,6 +229,21 @@ export function CustomCursor() {
     const show = () => {
       if (started) layer.setAttribute("data-on", "");
     };
+
+    /* The surface under a STATIONARY pointer can change colour on its own,
+       and nothing about that fires a pointer event:
+         - the nav CTA fills with the accent on hover, a transition that
+           finishes after the pointermove that triggered it;
+         - on the pinned Works showcase the whole flood colour changes from
+           one project to the next as the scroll advances.
+       Both were measured leaving a stale fallback behind - the second one
+       put a near-white cursor on a mint field at 1.44:1. Re-reading on a
+       slow timer covers every cause rather than the two known ones: it is a
+       single bounded walk up from one element, a few times a second, which
+       is far cheaper than the animation already running underneath it. */
+    const contrastTimer = window.setInterval(() => {
+      if (started) evaluateContrast(lastTarget);
+    }, 250);
 
     document.addEventListener("pointermove", onMove, { passive: true });
     document.addEventListener("pointerdown", onDown, { passive: true });
@@ -254,7 +260,7 @@ export function CustomCursor() {
       document.removeEventListener("pointerenter", show);
       window.removeEventListener("blur", hide);
       if (frame) cancelAnimationFrame(frame);
-      window.clearTimeout(recheck);
+      window.clearInterval(contrastTimer);
       root.classList.remove("has-custom-cursor");
     };
   }, [reduced, world.id]);

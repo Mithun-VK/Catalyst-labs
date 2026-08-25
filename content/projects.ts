@@ -59,26 +59,31 @@ export const STATUS_LABEL: Record<ProjectStatus, string> = {
   concluded: "Concluded",
 };
 
-/** The lead set - strongest proof first. These carry the section. */
+/**
+ * The lead set. These carry the section.
+ *
+ * ARRAY ORDER IS THE PUBLISHED ORDER. It drives the Works showcase panels
+ * and their 01-06 numbering (both derive the index from position, so the
+ * numbering follows automatically), the mobile PosterIndex, and which two
+ * names the Services page's closing bridge cites. Reordering here is the
+ * only place that has to change.
+ */
 export const projects: Project[] = [
   {
-    slug: "safemerchant",
-    accent: "orange",
+    slug: "fashion-profiles",
+    accent: "pink",
     featured: true,
-    name: "SafeMerchant",
-    domain: "Payments risk",
-    status: "production",
+    name: "TAIG Fashion Profiles",
+    domain: "Apparel sourcing",
+    status: "live",
     summary:
-      "A fraud scoring API for UPI merchant onboarding, serving live model inference from Mumbai.",
+      "A B2B site for an apparel sourcing and buying house, built to convert overseas buyer enquiries.",
     detail:
-      "Merchant applications are scored against a gradient-boosted model exported to ONNX for fast, dependency-light inference. The service runs behind a versioned API so scoring logic can change without breaking callers, and the full pipeline - feature construction, inference, thresholding - is covered by an automated test suite.",
-    proof: [
-      "ROC AUC 0.908 on held-out evaluation",
-      "ONNX runtime inference, no Python dependency at serve time",
-      "Deployed on AWS EC2, ap-south-1 (Mumbai)",
-      "Full test suite passing",
-    ],
-    technology: ["Python", "ONNX", "FastAPI", "AWS EC2", "PostgreSQL"],
+      "Presents sourcing capability, product categories and compliance credentials to international buyers, with enquiry capture as the primary action. Built for search visibility in a category where buyers research thoroughly before they make contact.",
+    proof: ["Live in production", "Structured for B2B buyer enquiry capture"],
+    technology: ["Next.js", "TypeScript", "Tailwind CSS", "Vercel"],
+    href: "https://fashionprofiles.in",
+    image: "/projects/fashion-profiles.png",
     year: "2026",
   },
   {
@@ -122,23 +127,6 @@ export const projects: Project[] = [
     year: "2026",
   },
   {
-    slug: "fashion-profiles",
-    accent: "pink",
-    featured: true,
-    name: "TAIG Fashion Profiles",
-    domain: "Apparel sourcing",
-    status: "live",
-    summary:
-      "A B2B site for an apparel sourcing and buying house, built to convert overseas buyer enquiries.",
-    detail:
-      "Presents sourcing capability, product categories and compliance credentials to international buyers, with enquiry capture as the primary action. Built for search visibility in a category where buyers research thoroughly before they make contact.",
-    proof: ["Live in production", "Structured for B2B buyer enquiry capture"],
-    technology: ["Next.js", "TypeScript", "Tailwind CSS", "Vercel"],
-    href: "https://fashionprofiles.in",
-    image: "/projects/fashion-profiles.png",
-    year: "2026",
-  },
-  {
     slug: "attram-ev",
     accent: "mint",
     featured: true,
@@ -153,6 +141,26 @@ export const projects: Project[] = [
     technology: ["Next.js", "TypeScript", "Tailwind CSS", "Vercel"],
     href: "https://attramevtech.com",
     image: "/projects/attram-ev.png",
+    year: "2026",
+  },
+  {
+    slug: "safemerchant",
+    accent: "orange",
+    featured: true,
+    name: "SafeMerchant",
+    domain: "Payments risk",
+    status: "production",
+    summary:
+      "A fraud scoring API for UPI merchant onboarding, serving live model inference from Mumbai.",
+    detail:
+      "Merchant applications are scored against a gradient-boosted model exported to ONNX for fast, dependency-light inference. The service runs behind a versioned API so scoring logic can change without breaking callers, and the full pipeline - feature construction, inference, thresholding - is covered by an automated test suite.",
+    proof: [
+      "ROC AUC 0.908 on held-out evaluation",
+      "ONNX runtime inference, no Python dependency at serve time",
+      "Deployed on AWS EC2, ap-south-1 (Mumbai)",
+      "Full test suite passing",
+    ],
+    technology: ["Python", "ONNX", "FastAPI", "AWS EC2", "PostgreSQL"],
     year: "2026",
   },
   {

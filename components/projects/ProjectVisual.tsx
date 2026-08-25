@@ -76,6 +76,25 @@ export function BrowserFrame({ project }: { project: Project }) {
               className="object-cover object-top"
             />
           ) : null}
+          {/* A solid curtain that slides clear via `transform`, not a
+              clip-path wipe on the image itself. clip-path recalculation is
+              expensive to repaint every scroll frame; translate3d is
+              compositor-only, which is what keeps this reveal smooth under a
+              fast scroll instead of dropping frames. See WorksShowcase.tsx.
+
+              opacity-0 by default: this markup is SHARED with PosterIndex
+              (the mobile/zero-JS presentation, see PosterIndex.tsx), which
+              never touches `data-gsap` and so would never move this curtain
+              off the screenshot. The desktop showcase turns it opaque itself
+              in its one-time setup, only for the panels it actually
+              controls - the default has to be "invisible" so a screenshot
+              is never hidden behind a curtain nothing will ever pull back. */}
+          <div
+            data-gsap="image-curtain"
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 opacity-0"
+            style={{ background: "var(--color-ink)" }}
+          />
         </div>
       </div>
     </div>

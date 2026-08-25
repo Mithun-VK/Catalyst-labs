@@ -1,4 +1,5 @@
 import { site } from "@/lib/site";
+import { Reveal } from "@/components/ui/Reveal";
 import { StudioType } from "./StudioType";
 
 /**
@@ -17,7 +18,7 @@ export function AboutHero() {
   return (
     <section
       aria-labelledby="about-heading"
-      className="pt-32 pb-(--space-section) sm:pt-44"
+      className="about-hero pt-32 pb-(--space-section) sm:pt-44"
     >
       <div className="container-page">
         <p className="font-mono text-[0.6875rem] uppercase tracking-[0.3em] text-ember">
@@ -36,16 +37,23 @@ export function AboutHero() {
           </span>
         </h1>
 
+        {/* These trail the headline's own entrance rather than landing with
+            it, so the eye is taken down the page in order: statement first,
+            then the qualification under it. */}
         <div className="mt-16 grid gap-x-(--space-gutter) gap-y-8 border-t border-line pt-10 lg:grid-cols-12">
-          <p className="text-lead text-paper-dim lg:col-span-5">
-            A software and AI engineering studio in {site.location.city},
-            building systems that businesses run on.
-          </p>
-          <p className="text-body text-mute lg:col-span-5 lg:col-start-8">
-            Small on purpose. The people who scope the work are the people who
-            build it, which is why the estimate and the system tend to agree
-            with each other.
-          </p>
+          <Reveal className="lg:col-span-5">
+            <p className="text-lead text-paper-dim">
+              A software and AI engineering studio in {site.location.city},
+              building systems that businesses run on.
+            </p>
+          </Reveal>
+          <Reveal delay={90} className="lg:col-span-5 lg:col-start-8">
+            <p className="text-body text-mute">
+              Small on purpose. The people who scope the work are the people
+              who build it, which is why the estimate and the system tend to
+              agree with each other.
+            </p>
+          </Reveal>
         </div>
       </div>
     </section>
