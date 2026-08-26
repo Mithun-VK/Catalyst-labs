@@ -28,6 +28,14 @@ export function About({ showHeading = true }: { showHeading?: boolean }) {
       id="about"
       labelledBy={showHeading ? "about-heading" : undefined}
       divider={showHeading}
+      // Without a heading, this section sits directly under AboutHero on
+      // /about, which already ends in its own full pb-(--space-section).
+      // Section's default py-(--space-section) would stack a SECOND full
+      // section gap on top of that with no divider rule to explain it (the
+      // divider is off here too) - a large dead gap rather than a deliberate
+      // break. Dropping this section's own top padding leaves exactly one
+      // section-gap between them, same as everywhere else on the site.
+      className={!showHeading ? "pt-0" : undefined}
     >
       {showHeading ? (
         <SectionHeading
