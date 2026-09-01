@@ -1,5 +1,5 @@
 import { Section, SectionHeading } from "@/components/ui/Section";
-import { Reveal } from "@/components/ui/Reveal";
+import { ApproachGrid, ApproachCell } from "./ApproachGrid";
 
 /**
  * APPROACH - precision world.
@@ -17,6 +17,10 @@ import { Reveal } from "@/components/ui/Reveal";
  * disproven - it is a description of a discipline, which is the part that
  * can honestly be promised before a line of a client's code has been
  * written.
+ *
+ * The grid's ignition (each cell settling in, GSAP-scrubbed to scroll
+ * position) and cursor tilt live in ApproachGrid/ApproachCell - client
+ * components, isolated from this one, which stays a server component.
  */
 export function Approach() {
   return (
@@ -36,23 +40,27 @@ export function Approach() {
       />
 
       <div className="container-page mt-14">
-        <Reveal>
-          <dl className="grid gap-px border border-line bg-line sm:grid-cols-2">
-            {DOMAINS.map((d) => (
-              <div key={d.name} className="bg-ink px-7 py-9 sm:px-8 sm:py-10">
+        <ApproachGrid>
+          {DOMAINS.map((d) => (
+            <ApproachCell key={d.name}>
+              <dl>
                 <dt className="label flex items-center gap-3 text-mute-deep">
                   <span className="text-ember">{d.index}</span>
-                  <span aria-hidden="true" className="h-px w-8 bg-line-strong" />
+                  <span
+                    aria-hidden="true"
+                    data-approach-rule
+                    className="h-px w-8 bg-line-strong"
+                  />
                   {d.name}
                 </dt>
                 <dd className="mt-5 text-h3 text-paper">{d.claim}</dd>
                 <dd className="mt-4 max-w-(--measure) text-body text-mute">
                   {d.body}
                 </dd>
-              </div>
-            ))}
-          </dl>
-        </Reveal>
+              </dl>
+            </ApproachCell>
+          ))}
+        </ApproachGrid>
       </div>
     </Section>
   );

@@ -1,5 +1,6 @@
 import { ButtonLink } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
+import { PulseGrid } from "@/components/visuals/PulseGrid";
 import { site, whatsappLink } from "@/lib/site";
 
 /**
@@ -14,15 +15,23 @@ import { site, whatsappLink } from "@/lib/site";
  * to a dark ground and read as a stain on ivory, and a large soft glow is the
  * one visual cliche this site is most careful to avoid. The hairline grid
  * carries the surface instead.
+ *
+ * `animated` is opt-in and OFF by default - every existing call site (About,
+ * Services, Work, Process, AI) keeps the identical static grid it has always
+ * had. Only Home passes it, to close the page on the same "alive" register
+ * its other sections now open with, without changing this shared component's
+ * behaviour anywhere else it is used.
  */
 export function CTABand({
   title = "Have a problem worth solving?",
   accent = "Let's build it.",
   lead = "Tell us what you're trying to build, automate or improve. If we're not the right people for it, we'll say so - and point you at who is.",
+  animated = false,
 }: {
   title?: string;
   accent?: string;
   lead?: string;
+  animated?: boolean;
 }) {
   return (
     <section
@@ -33,6 +42,9 @@ export function CTABand({
         aria-hidden="true"
         className="grid-field pointer-events-none absolute inset-0 -z-10 opacity-60"
       />
+      {animated ? (
+        <PulseGrid className="pointer-events-none absolute inset-0 -z-10" />
+      ) : null}
       <div className="container-page">
         <div className="grid gap-x-(--space-gutter) gap-y-10 lg:grid-cols-12">
           <div className="lg:col-span-7">

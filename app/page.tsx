@@ -18,11 +18,15 @@ export const metadata: Metadata = buildMetadata({
 /**
  * HOME - the precision world.
  *
- * The most restrained page on the site, and deliberately the least
- * decorated. Its only job is to make a stranger believe this company can
- * build their system, which is a question answered by evidence and structure
- * rather than by motion. The experimental pages earn their licence precisely
- * because this one does not spend it.
+ * Its job is still to make a stranger believe this company can build their
+ * system - answered by evidence and structure, not by decoration for its own
+ * sake. What changed is HOW that structure moves: every section below now
+ * carries real, purposeful motion (GSAP scroll-scrubbed reveals in Approach
+ * and WhyUs, Motion-driven interaction in Capabilities, anime.js timelines in
+ * the hero and closing CTA) instead of the page being the one deliberately
+ * quiet stop between more expressive pages. The restraint moved from
+ * "how much moves" to "why it moves" - nothing here animates without a scroll
+ * position, a hover, or an entrance driving it.
  *
  * The four preview sections that originally sat here (work, services, AI,
  * process) were replaced by two real indexes early in this redesign; the
@@ -44,6 +48,7 @@ export default function HomePage() {
         title="Have a system worth building?"
         accent="Let's scope it."
         lead="Tell us what you're trying to build, automate or improve. If we're not the right people for it, we'll say so - and point you at who is."
+        animated
       />
     </World>
   );

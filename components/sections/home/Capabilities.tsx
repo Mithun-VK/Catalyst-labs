@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { services } from "@/content/services";
 import { Section, SectionHeading } from "@/components/ui/Section";
-import { Reveal } from "@/components/ui/Reveal";
+import { CapabilitiesList } from "./CapabilitiesList";
 
 /**
  * CAPABILITIES - precision world.
@@ -16,7 +15,8 @@ import { Reveal } from "@/components/ui/Reveal";
  * advertises a discipline it has no offer for is the fastest way to fail the
  * first technical call.
  *
- * Server component, no JavaScript: the hover state is CSS only.
+ * The list itself (hover sweep, entrance stagger) lives in CapabilitiesList,
+ * a client component - this one stays server-rendered.
  */
 export function Capabilities() {
   return (
@@ -35,39 +35,7 @@ export function Capabilities() {
       />
 
       <div className="container-page mt-14">
-        <Reveal>
-          <ul className="border-t border-line">
-            {services.map((service) => (
-              <li key={service.id} className="border-b border-line">
-                <Link
-                  href={`/services/${service.id}`}
-                  className="group grid grid-cols-[auto_1fr_auto] items-baseline gap-x-5 gap-y-2 py-7 sm:gap-x-10 lg:py-8"
-                >
-                  <span className="font-mono text-[0.75rem] tabular text-mute-deep transition-colors duration-(--duration-base) group-hover:text-ember">
-                    {service.index}
-                  </span>
-
-                  <span className="min-w-0">
-                    <span className="block text-h2 text-paper transition-colors duration-(--duration-base) group-hover:text-ember">
-                      {service.title}
-                    </span>
-                    <span className="mt-2 block max-w-(--measure) text-body text-mute">
-                      {service.summary}
-                    </span>
-                  </span>
-
-                  {/* Affordance only - the whole row is the target. */}
-                  <span
-                    aria-hidden="true"
-                    className="translate-x-0 text-mute-deep transition-[transform,color] duration-(--duration-base) ease-(--ease-out-quart) group-hover:translate-x-1 group-hover:text-ember"
-                  >
-                    →
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Reveal>
+        <CapabilitiesList services={services} />
       </div>
     </Section>
   );

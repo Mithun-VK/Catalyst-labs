@@ -2,12 +2,24 @@ import { capabilities } from "@/content/tech";
 import { projects } from "@/content/projects";
 import { site } from "@/lib/site";
 import { Reveal } from "@/components/ui/Reveal";
+import { CountUp } from "@/components/motion/CountUp";
 
 /**
  * Credibility without invention. No borrowed logos and no vanity counters -
  * who the work is for, the capability set, and facts a visitor can check for
- * themselves: the registration number, and the count of client sites that are
- * actually live (each one linked by name on /work).
+ * themselves: the registration number, the MSME classification, and the count
+ * of client sites that are actually live (each one linked by name on /work).
+ *
+ * The classification row and the discipline list arrived here from the hero's
+ * old specification panel (see Hero.tsx), which was restating this strip's
+ * registry number and city one screen above it. This is now the single place
+ * on the page where the studio's registration facts are stated.
+ *
+ * The live-site count is the ONE number on this page worth animating, and it
+ * animates because it is real: it is derived from the projects that actually
+ * carry a public URL, so it cannot drift from what /work shows. Nothing else
+ * here is a figure, because nothing else here is a figure that could be
+ * verified.
  */
 export function TrustStrip() {
   const items = [...capabilities, ...capabilities]; // duplicated for the loop
@@ -32,9 +44,16 @@ export function TrustStrip() {
               </dd>
             </div>
             <div className="flex items-baseline gap-2.5">
+              <dt className="label text-mute-deep">Class</dt>
+              <dd className="text-small text-paper-dim">
+                {site.registration.classification}
+              </dd>
+            </div>
+            <div className="flex items-baseline gap-2.5">
               <dt className="label text-mute-deep">Live sites</dt>
               <dd className="text-small text-paper-dim">
-                {liveSites} in production
+                <CountUp value={liveSites} className="tabular text-paper" /> in
+                production
               </dd>
             </div>
             <div className="flex items-baseline gap-2.5">
