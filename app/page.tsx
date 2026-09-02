@@ -7,6 +7,8 @@ import { Approach } from "@/components/sections/home/Approach";
 import { Capabilities } from "@/components/sections/home/Capabilities";
 import { WhyUs } from "@/components/sections/WhyUs";
 import { CTABand } from "@/components/sections/CTABand";
+import { ChainStrip } from "@/components/visuals/ChainStrip";
+import { Reveal } from "@/components/ui/Reveal";
 
 export const metadata: Metadata = buildMetadata({
   title: "Website & Software Development in Chennai | Catalyst Labs",
@@ -41,6 +43,13 @@ export default function HomePage() {
     <World id="precision">
       <Hero />
       <TrustStrip />
+      <section aria-label="How the work moves" className="border-b border-line py-10">
+        <div className="container-page">
+          <Reveal>
+            <ChainStrip />
+          </Reveal>
+        </div>
+      </section>
       <Approach />
       <Capabilities />
       <WhyUs />
