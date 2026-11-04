@@ -1,6 +1,7 @@
 import { site } from "@/lib/site";
 import { abs } from "@/lib/seo";
 import { services } from "@/content/services";
+import { projects, alsoBuilt, STATUS_LABEL } from "@/content/projects";
 import { JsonLd } from "./JsonLd";
 
 /**
@@ -21,6 +22,8 @@ export function StructuredData() {
     "@id": abs("/#organization"),
     name: site.name,
     legalName: site.legalName,
+    alternateName: site.alternateName,
+    founder: { "@id": abs("/#founder") },
     url: abs(),
     description: site.description,
     slogan: site.tagline,
@@ -75,6 +78,30 @@ export function StructuredData() {
       : {}),
   };
 
+  const founder = {
+    "@type": "Person",
+    "@id": abs("/#founder"),
+    name: site.founder.name,
+    jobTitle: site.founder.jobTitle,
+    worksFor: { "@id": abs("/#organization") },
+    ...(site.founder.sameAs.length ? { sameAs: [...site.founder.sameAs] } : {}),
+  };
+
+  // Projects with a public URL are typed WebSite; the rest are CreativeWork,
+  // both carrying the same status text
+  // the Works page shows, so markup never claims more than the page does.
+  const projectEntities = [...projects, ...alsoBuilt].map((p) => ({
+    "@type": p.href ? "WebSite" : "CreativeWork",
+    "@id": abs(`/work#${p.slug}`),
+    name: p.name,
+    description: `${p.summary} Status: ${STATUS_LABEL[p.status]}.`,
+    genre: p.domain,
+    dateCreated: p.year,
+    keywords: p.technology.join(", "),
+    ...(p.href ? { url: p.href } : {}),
+    creator: { "@id": abs("/#organization") },
+  }));
+
   const website = {
     "@type": "WebSite",
     "@id": abs("/#website"),
@@ -113,7 +140,7 @@ export function StructuredData() {
     <JsonLd
       data={{
         "@context": "https://schema.org",
-        "@graph": [organization, website, ...serviceEntities],
+        "@graph": [organization, founder, website, ...serviceEntities, ...projectEntities],
       }}
     />
   );

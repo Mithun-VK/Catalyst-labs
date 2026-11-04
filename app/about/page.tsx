@@ -7,6 +7,7 @@ import { About } from "@/components/sections/About";
 import { ProcessSchedule } from "@/components/sections/about/ProcessSchedule";
 import { TechStack } from "@/components/sections/TechStack";
 import { CTABand } from "@/components/sections/CTABand";
+import { InternationalClients } from "@/components/sections/InternationalClients";
 
 export const metadata: Metadata = buildMetadata({
   title: "About Catalyst Labs: A Software & AI Studio in Chennai",
@@ -34,6 +35,7 @@ export default function AboutPage() {
       <About showHeading={false} />
       <ProcessSchedule />
       <TechStack />
+      <InternationalClients />
       <CTABand
         title="Want to work with a team this size?"
         accent="That is the point."

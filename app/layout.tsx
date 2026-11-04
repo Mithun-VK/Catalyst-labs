@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import Script from "next/script";
 import "./globals.css";
 import { Navbar } from "@/components/nav/Navbar";
 import { Footer } from "@/components/Footer";
 import { site } from "@/lib/site";
+import { AttributionCapture } from "@/components/analytics/AttributionCapture";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { SpotlightRoot } from "@/components/ui/SpotlightRoot";
 import { CustomCursor } from "@/components/ui/CustomCursor";
@@ -157,6 +159,15 @@ export default function RootLayout({
         </main>
         <Footer />
         <StructuredData />
+        <AttributionCapture />
+        {process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ? (
+          <Script
+            defer
+            data-domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN}
+            src="https://plausible.io/js/script.js"
+            strategy="afterInteractive"
+          />
+        ) : null}
         <SpotlightRoot />
         <CustomCursor />
       </body>

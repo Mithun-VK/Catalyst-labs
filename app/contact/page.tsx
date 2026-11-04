@@ -4,6 +4,8 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { World } from "@/components/worlds/World";
 import { SystemHero } from "@/components/sections/contact/SystemHero";
 import { ContactBody } from "@/components/sections/Contact";
+import { BookingEmbed } from "@/components/sections/BookingEmbed";
+import { InternationalClients } from "@/components/sections/InternationalClients";
 
 export const metadata: Metadata = buildMetadata({
   title: "Contact Catalyst Labs: Start a Software or AI Project",
@@ -31,6 +33,8 @@ export default function ContactPage() {
       <JsonLd data={breadcrumbSchema([{ name: "Contact", path: "/contact" }])} />
       <SystemHero />
       <ContactBody />
+      <BookingEmbed />
+      <InternationalClients />
     </World>
   );
 }

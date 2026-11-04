@@ -9,15 +9,27 @@
 export const site = {
   name: "Catalyst Labs",
   legalName: "Catalyst Labs",
+  /** Disambiguates from the unrelated companies that share the name. */
+  alternateName: ["Catalyst Labs Chennai", "catalystlabs.co.in"],
   /** Update to the live apex domain before launch; used for canonicals + OG. */
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://catalystlabs.co.in",
   tagline: "We build the software that moves businesses forward.",
   description:
-    "Catalyst Labs is a software and AI engineering studio. We build custom software, web and mobile applications, AI systems and automation around the way a business actually works.",
+    "Catalyst Labs is a Chennai-based software and AI engineering studio, established in 2026. We build custom software, web and mobile applications, AI systems and automation around the way a business actually works.",
   shortDescription:
     "Custom software, AI systems and automation, engineered around the way your business actually works.",
   founded: "2026",
   locale: "en_IN",
+
+  /** The person behind the studio. Add `sameAs` profile URLs only when real. */
+  founder: {
+    name: "Mithun V. K.",
+    jobTitle: "Founder",
+    sameAs: [
+      "https://github.com/Mithun-VK/",
+      "https://www.linkedin.com/in/mithunvk06/",
+    ] as string[],
+  },
 
   contact: {
     email: "mithun@catalystlabs.co.in",
@@ -45,6 +57,24 @@ export const site = {
     classification: "Micro Enterprise",
     activity: "Computer programming, consultancy and related activities",
     verifyUrl: "https://udyamregistration.gov.in/",
+  },
+
+  /**
+   * Booking link (Cal.com / Calendly). Set NEXT_PUBLIC_BOOKING_URL; when it is
+   * empty every "Book a call" button is hidden.
+   */
+  booking: {
+    url: process.env.NEXT_PUBLIC_BOOKING_URL ?? "",
+    minutes: 30,
+  },
+
+  /**
+   * TODO(owner): confirm before publishing. Anything left empty/false is NOT
+   * shown on the site. `overlapHours` e.g. "14:00-23:00 IST (by appointment)".
+   */
+  internationalClients: {
+    overlapHours: "",
+    milestonePayments: false,
   },
 
   /** Add real profiles only. An empty string hides the link entirely. */

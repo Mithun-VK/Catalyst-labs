@@ -14,6 +14,7 @@ export type AnalyticsEvent =
   | "nav_click"
   | "whatsapp_click"
   | "email_click"
+  | "booking_click"
   | "service_opened"
   | "case_study_opened"
   | "blueprint_opened"

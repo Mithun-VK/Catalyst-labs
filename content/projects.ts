@@ -155,7 +155,7 @@ export const projects: Project[] = [
     detail:
       "Merchant applications are scored against a gradient-boosted model exported to ONNX for fast, dependency-light inference. The service runs behind a versioned API so scoring logic can change without breaking callers, and the full pipeline - feature construction, inference, thresholding - is covered by an automated test suite.",
     proof: [
-      "ROC AUC 0.908 on held-out evaluation",
+      "ROC AUC 0.908 on held-out evaluation, measured against the deployed AWS service during the test run",
       "ONNX runtime inference, no Python dependency at serve time",
       "Deployed on AWS EC2, ap-south-1 (Mumbai)",
       "Full test suite passing",

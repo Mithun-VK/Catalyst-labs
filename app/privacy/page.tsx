@@ -13,7 +13,7 @@ export const metadata: Metadata = buildMetadata({
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy" updated="August 2026">
+    <LegalPage title="Privacy Policy" updated="November 2026">
       <LegalSection title="What this covers">
         <p>
           This policy explains what happens to information you share with{" "}
@@ -24,35 +24,52 @@ export default function PrivacyPage() {
 
       <LegalSection title="What we collect">
         <p>
-          Only what you type into the enquiry form: your name, company, email,
-          phone number, and the details of the project you describe. Nothing is
-          collected from you passively beyond the standard request data your
-          browser sends to our hosting provider (IP address, user agent,
-          timestamp), which is used to keep the site available and to rate-limit
-          form abuse.
+          What you type into the enquiry form: your name, company, email, phone
+          number, country, time zone, preferred way to talk, budget band and
+          currency, and the details of the project you describe. With the form
+          we also record where you came from: the page you landed on, the
+          referring site, and any utm_ or source tag in the link. This is kept
+          in your browser&rsquo;s session storage for the visit and is not a
+          cookie.
         </p>
         <p>
-          We do not use advertising cookies or cross-site trackers. If we add
-          privacy-respecting analytics in future, this section will say so
-          before it goes live.
+          Your hosting provider also receives standard request data (IP
+          address, user agent, timestamp), which we use to keep the site
+          available and to rate-limit form abuse.
+        </p>
+        <p>
+          We do not use advertising cookies or cross-site trackers. Where
+          configured, we use Plausible Analytics, a cookieless service that
+          counts visits and button clicks without identifying individuals.
         </p>
       </LegalSection>
 
       <LegalSection title="How we use it">
         <p>
-          To reply to your enquiry and to have the conversation that follows.
-          That is the only purpose. We do not sell, rent or share your details
-          with third parties for marketing, and we do not add you to a mailing
-          list you did not ask for.
+          To reply to your enquiry and to have the conversation that follows,
+          including a short automatic acknowledgement email when you submit the
+          form. The attribution details help us understand which channels bring
+          useful enquiries. We do not sell, rent or share your details with
+          third parties for marketing, and we do not add you to a mailing list
+          you did not ask for.
+        </p>
+        <p>
+          Our legal basis (GDPR and UK GDPR) is our legitimate interest in
+          responding to enquiries you send us, and steps taken at your request
+          before a contract. For India, we process this data with your consent
+          given by submitting the form, under the Digital Personal Data
+          Protection Act, 2023.
         </p>
       </LegalSection>
 
       <LegalSection title="Where it goes">
         <p>
-          Enquiries are delivered to our own email inbox, and may pass through
-          the email delivery provider and hosting platform that run this site.
-          Those providers process the data on our behalf, under their own
-          security obligations.
+          Enquiries are delivered to our own email inbox and processed on our
+          behalf by Resend (email delivery), Vercel (hosting) and, where
+          enabled, Plausible (analytics). Some of these providers operate
+          outside India and outside your country, so your information may be
+          transferred internationally. They process it under their own
+          security and data-protection commitments.
         </p>
       </LegalSection>
 
@@ -73,7 +90,7 @@ export default function PrivacyPage() {
           >
             {site.contact.email}
           </a>{" "}
-          to ask what we hold about you, to correct it, or to have it deleted.
+          to ask what we hold about you, to correct it, to object to its use, or to have it deleted.
           We will action the request within 30 days.
         </p>
       </LegalSection>

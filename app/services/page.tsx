@@ -14,7 +14,7 @@ import { CTABand } from "@/components/sections/CTABand";
 export const metadata: Metadata = buildMetadata({
   title: "Software, AI & Automation Services | Catalyst Labs",
   description:
-    "Custom software, AI and automation, web and mobile applications, SaaS builds and data integrations - scoped around how your business actually runs.",
+    "Custom software, AI automation, web and mobile apps built in India for US, UK, EU and Indian businesses. Fixed-scope proposals, clear ownership.",
   path: "/services",
 });
 

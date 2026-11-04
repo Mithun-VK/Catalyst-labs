@@ -6,6 +6,7 @@ import { TrustStrip } from "@/components/sections/TrustStrip";
 import { Approach } from "@/components/sections/home/Approach";
 import { Capabilities } from "@/components/sections/home/Capabilities";
 import { WhyUs } from "@/components/sections/WhyUs";
+import { Faq } from "@/components/sections/home/Faq";
 import { CTABand } from "@/components/sections/CTABand";
 import { ChainStrip } from "@/components/visuals/ChainStrip";
 import { Reveal } from "@/components/ui/Reveal";
@@ -13,7 +14,7 @@ import { Reveal } from "@/components/ui/Reveal";
 export const metadata: Metadata = buildMetadata({
   title: "Website & Software Development in Chennai | Catalyst Labs",
   description:
-    "Scalable, efficient web development, custom software and AI automation. A Chennai studio engineering systems built to grow without a rewrite.",
+    "Software & AI development company in India for US, UK and EU clients. Custom software, web apps and automation from Chennai. Fixed-scope proposals.",
   path: "",
 });
 
@@ -53,6 +54,7 @@ export default function HomePage() {
       <Approach />
       <Capabilities />
       <WhyUs />
+      <Faq />
       <CTABand
         title="Have a system worth building?"
         accent="Let's scope it."

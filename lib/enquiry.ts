@@ -14,13 +14,52 @@ export const PROJECT_TYPES = [
   "Not sure yet",
 ] as const;
 
-export const BUDGET_RANGES = [
-  "Under ₹2L",
-  "₹2L – ₹5L",
-  "₹5L – ₹15L",
-  "₹15L+",
-  "Needs discussion",
+export const CURRENCIES = ["USD", "GBP", "EUR", "INR"] as const;
+export type Currency = (typeof CURRENCIES)[number];
+
+/** Budget bands per currency. Ranges are enquiry guidance, not price quotes. */
+export const BUDGETS_BY_CURRENCY: Record<Currency, readonly string[]> = {
+  USD: ["Under $3k", "$3k – $10k", "$10k – $30k", "$30k+", "Needs discussion"],
+  GBP: ["Under £2.5k", "£2.5k – £8k", "£8k – £25k", "£25k+", "Needs discussion"],
+  EUR: ["Under €3k", "€3k – €9k", "€9k – €28k", "€28k+", "Needs discussion"],
+  INR: ["Under ₹2L", "₹2L – ₹5L", "₹5L – ₹15L", "₹15L+", "Needs discussion"],
+};
+
+export const COUNTRIES = [
+  "United States",
+  "United Kingdom",
+  "Canada",
+  "Australia",
+  "Germany",
+  "Netherlands",
+  "France",
+  "Ireland",
+  "United Arab Emirates",
+  "Saudi Arabia",
+  "Singapore",
+  "India",
+  "Other",
 ] as const;
+
+export const CONTACT_METHODS = ["Email", "WhatsApp", "Video call"] as const;
+
+/** Best-effort defaults from the browser time zone. The visitor can change both. */
+export function guessLocale(timeZone: string): {
+  currency: Currency;
+  country: string;
+} {
+  if (timeZone === "Asia/Kolkata" || timeZone === "Asia/Calcutta") {
+    return { currency: "INR", country: "India" };
+  }
+  if (timeZone === "Europe/London") {
+    return { currency: "GBP", country: "United Kingdom" };
+  }
+  if (timeZone.startsWith("Europe/")) return { currency: "EUR", country: "" };
+  if (timeZone === "Asia/Dubai") {
+    return { currency: "USD", country: "United Arab Emirates" };
+  }
+  return { currency: "USD", country: "" };
+}
 
 export const TIMELINES = [
   "As soon as possible",
@@ -35,8 +74,22 @@ export type EnquiryInput = {
   email: string;
   phone: string;
   projectType: string;
+  /** Selected budget currency; `budget` holds a band from BUDGETS_BY_CURRENCY. */
+  currency: string;
   budget: string;
   timeline: string;
+  country: string;
+  /** IANA zone, auto-detected and editable, e.g. "Europe/London". */
+  timezone: string;
+  contactMethod: string;
+  /* Attribution, captured client-side on first visit. */
+  utmSource: string;
+  utmMedium: string;
+  utmCampaign: string;
+  referrer: string;
+  landingPage: string;
+  /** Free-form origin tag from ?source=, e.g. "work-safemerchant". */
+  source: string;
   brief: string;
   currentProduct: string;
   notes: string;
@@ -59,6 +112,9 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE_RE = /^[+()\d][\d\s\-()]{6,20}$/;
 
 export const LIMITS = {
+  country: 60,
+  timezone: 60,
+  attribution: 200,
   name: 80,
   company: 100,
   email: 160,
@@ -75,8 +131,18 @@ export function emptyEnquiry(): EnquiryInput {
     email: "",
     phone: "",
     projectType: "",
+    currency: "USD",
     budget: "",
     timeline: "",
+    country: "",
+    timezone: "",
+    contactMethod: "",
+    utmSource: "",
+    utmMedium: "",
+    utmCampaign: "",
+    referrer: "",
+    landingPage: "",
+    source: "",
     brief: "",
     currentProduct: "",
     notes: "",
@@ -120,6 +186,18 @@ export function validateField(
       return undefined;
     case "currentProduct":
       if (v.length > LIMITS.currentProduct) return "That's too long.";
+      return undefined;
+    case "currency":
+      if (v && !(CURRENCIES as readonly string[]).includes(v)) return "Pick a listed currency.";
+      return undefined;
+    case "country":
+      if (v.length > LIMITS.country) return "That's too long.";
+      return undefined;
+    case "timezone":
+      if (v.length > LIMITS.timezone) return "That's too long.";
+      return undefined;
+    case "contactMethod":
+      if (v && !(CONTACT_METHODS as readonly string[]).includes(v)) return "Pick a listed method.";
       return undefined;
     case "notes":
       if (v.length > LIMITS.notes) return `Keep this under ${LIMITS.notes} characters.`;

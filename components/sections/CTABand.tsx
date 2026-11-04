@@ -1,5 +1,6 @@
 import { ButtonLink } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
+import { BookingButton } from "@/components/ui/BookingButton";
 import { PulseGrid } from "@/components/visuals/PulseGrid";
 import { site, whatsappLink } from "@/lib/site";
 
@@ -81,6 +82,11 @@ export function CTABand({
                 >
                   Message on WhatsApp
                 </ButtonLink>
+                <BookingButton
+                  location="cta_band"
+                  variant="ghost"
+                  className="w-full sm:w-auto"
+                />
               </div>
             </Reveal>
           </div>

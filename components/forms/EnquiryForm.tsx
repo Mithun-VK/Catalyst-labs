@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  BUDGET_RANGES,
+  BUDGETS_BY_CURRENCY,
+  CONTACT_METHODS,
+  COUNTRIES,
+  CURRENCIES,
+  guessLocale,
+  type Currency,
   emptyEnquiry,
   LIMITS,
   PROJECT_TYPES,
@@ -13,6 +18,8 @@ import {
   type FieldErrors,
 } from "@/lib/enquiry";
 import { track } from "@/lib/analytics";
+import { readAttribution } from "@/lib/attribution";
+import { BookingButton } from "@/components/ui/BookingButton";
 import { mailtoLink, site, whatsappLink } from "@/lib/site";
 import { cn } from "@/lib/cn";
 
@@ -30,6 +37,20 @@ export function EnquiryForm() {
 
   useEffect(() => {
     mountedAt.current = Date.now();
+    // Prefill time zone, currency and (where unambiguous) country. All three
+    // stay editable; a wrong guess costs the visitor one click.
+    try {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? "";
+      const guess = guessLocale(timezone);
+      setValues((v) => ({
+        ...v,
+        timezone: v.timezone || timezone,
+        currency: guess.currency,
+        country: v.country || guess.country,
+      }));
+    } catch {
+      // Leave the defaults.
+    }
   }, []);
 
   // Move focus to whichever outcome the submit produced.
@@ -58,7 +79,11 @@ export function EnquiryForm() {
     e.preventDefault();
     setFormError("");
 
-    const payload = { ...values, elapsedMs: Date.now() - mountedAt.current };
+    const payload = {
+      ...values,
+      ...readAttribution(),
+      elapsedMs: Date.now() - mountedAt.current,
+    };
     const result = validateEnquiry(payload);
 
     if (!result.ok) {
@@ -86,7 +111,10 @@ export function EnquiryForm() {
 
       if (res.ok) {
         setStatus("success");
-        track("form_submitted", { projectType: payload.projectType });
+        track("form_submitted", {
+          projectType: payload.projectType,
+          country: payload.country || "unknown",
+        });
         return;
       }
 
@@ -149,6 +177,7 @@ export function EnquiryForm() {
         </p>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <BookingButton location="form_success" variant="primary" size="md" />
           <a
             href={whatsappLink("Hi Catalyst Labs - I just submitted an enquiry.")}
             target="_blank"
@@ -232,6 +261,38 @@ export function EnquiryForm() {
         />
       </div>
 
+      <div className="mt-6 grid gap-6 sm:grid-cols-2">
+        <div>
+          <label htmlFor="field-country" className="label flex items-center gap-2 text-mute">
+            Country
+            <span className="text-mute-deep normal-case tracking-normal">(optional)</span>
+          </label>
+          <select
+            id="field-country"
+            name="country"
+            value={values.country}
+            autoComplete="country-name"
+            onChange={(e) => set("country", e.target.value)}
+            className="mt-2.5 w-full border border-line bg-ink px-4 py-3 text-paper transition-colors duration-(--duration-base) hover:border-line-strong focus:border-ember focus:outline-none"
+          >
+            <option value="">Select</option>
+            {COUNTRIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+        <Field
+          id="timezone"
+          label="Time zone"
+          value={values.timezone}
+          maxLength={LIMITS.timezone}
+          hint="Detected automatically. Helps us suggest call times."
+          onChange={(v) => set("timezone", v)}
+        />
+      </div>
+
       <div className="mt-8 grid gap-8">
         <ChoiceGroup
           name="projectType"
@@ -244,13 +305,35 @@ export function EnquiryForm() {
         />
 
         <div className="grid gap-8 sm:grid-cols-2">
-          <ChoiceGroup
-            name="budget"
-            label="Budget range"
-            options={BUDGET_RANGES}
-            value={values.budget}
-            onChange={(v) => set("budget", v)}
-          />
+          <div>
+            <div className="mb-3 flex items-center gap-2" role="group" aria-label="Budget currency">
+              {CURRENCIES.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  aria-pressed={values.currency === c}
+                  onClick={() => {
+                    setValues((v) => ({ ...v, currency: c, budget: "" }));
+                  }}
+                  className={cn(
+                    "h-8 cursor-pointer border px-3 font-mono text-[0.6875rem] uppercase tracking-[0.12em] transition-colors duration-(--duration-base)",
+                    values.currency === c
+                      ? "border-line-ember bg-ember/10 text-paper"
+                      : "border-line text-mute hover:border-line-strong hover:text-paper"
+                  )}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+            <ChoiceGroup
+              name="budget"
+              label="Budget range"
+              options={BUDGETS_BY_CURRENCY[values.currency as Currency] ?? BUDGETS_BY_CURRENCY.USD}
+              value={values.budget}
+              onChange={(v) => set("budget", v)}
+            />
+          </div>
           <ChoiceGroup
             name="timeline"
             label="Timeline"
@@ -259,6 +342,14 @@ export function EnquiryForm() {
             onChange={(v) => set("timeline", v)}
           />
         </div>
+
+        <ChoiceGroup
+          name="contactMethod"
+          label="Preferred way to talk"
+          options={CONTACT_METHODS}
+          value={values.contactMethod}
+          onChange={(v) => set("contactMethod", v)}
+        />
       </div>
 
       <div className="mt-8 grid gap-6">
@@ -344,7 +435,12 @@ export function EnquiryForm() {
 
       <div className="mt-8 flex flex-col gap-4 border-t border-line pt-7 sm:flex-row sm:items-center sm:justify-between">
         <p className="max-w-xs text-[0.8125rem] text-mute-deep">
-          We use these details to reply to your enquiry. Nothing is shared or sold.
+          We use these details only to reply to your enquiry. Nothing is shared or
+          sold. See our{" "}
+          <a href="/privacy" className="underline underline-offset-4 hover:text-paper">
+            privacy policy
+          </a>
+          .
         </p>
 
         <button

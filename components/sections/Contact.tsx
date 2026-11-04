@@ -2,6 +2,7 @@ import { EnquiryForm } from "@/components/forms/EnquiryForm";
 import { Reveal } from "@/components/ui/Reveal";
 import { mailtoLink, site, whatsappLink } from "@/lib/site";
 import { ContactLink } from "@/components/ui/ContactLink";
+import { BookingButton } from "@/components/ui/BookingButton";
 
 /**
  * The conversion surface. Three direct channels ordered by how much friction
@@ -20,7 +21,15 @@ export function ContactBody() {
     >
       <div className="container-page">
         <div className="grid gap-x-(--space-gutter) gap-y-14 lg:grid-cols-12">
-          <div className="lg:col-span-5">
+          {/* min-w-0: without it, a grid item's automatic minimum width is
+              its content's min-content size - and the nested flex row in
+              ContactLink (label + truncated value + icon) has enough fixed-
+              width siblings that its min-content exceeds this column's
+              share of the container, so the grid track blows out past the
+              viewport on mobile. min-w-0 lets the track size to the
+              container instead, and truncate (already min-w-0 internally)
+              still ellipsizes the value correctly. */}
+          <div className="min-w-0 lg:col-span-5">
             <Reveal>
               <h2 className="text-h3 text-paper">Reach us directly</h2>
               <p className="mt-3 text-body text-mute">
@@ -28,6 +37,16 @@ export function ContactBody() {
                 your project.
               </p>
             </Reveal>
+
+            {site.booking.url ? (
+              <Reveal delay={60}>
+                <BookingButton
+                  location="contact"
+                  variant="primary"
+                  className="mt-8 w-full sm:w-auto"
+                />
+              </Reveal>
+            ) : null}
 
             <Reveal delay={80}>
               <div className="mt-8 border-t border-line">
@@ -85,7 +104,7 @@ export function ContactBody() {
             </Reveal>
           </div>
 
-          <Reveal delay={120} className="lg:col-span-7">
+          <Reveal delay={120} className="min-w-0 lg:col-span-7">
             <EnquiryForm />
           </Reveal>
         </div>

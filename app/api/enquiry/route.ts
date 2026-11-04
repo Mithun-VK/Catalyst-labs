@@ -108,6 +108,9 @@ export async function POST(request: Request) {
     );
   }
 
+  const field = (value: unknown, max = 200) =>
+    String(value ?? "").trim().slice(0, max);
+
   const enquiry = {
     name: String(body.name).trim(),
     company: String(body.company ?? "").trim(),
@@ -115,10 +118,20 @@ export async function POST(request: Request) {
     phone: String(body.phone ?? "").trim(),
     projectType: String(body.projectType).trim(),
     budget: String(body.budget ?? "").trim(),
+    currency: field(body.currency, 3),
     timeline: String(body.timeline ?? "").trim(),
+    country: field(body.country, 60),
+    timezone: field(body.timezone, 60),
+    contactMethod: field(body.contactMethod, 20),
     brief: String(body.brief).trim(),
     currentProduct: String(body.currentProduct ?? "").trim(),
     notes: String(body.notes ?? "").trim(),
+    source: field(body.source),
+    utmSource: field(body.utmSource),
+    utmMedium: field(body.utmMedium),
+    utmCampaign: field(body.utmCampaign),
+    referrer: field(body.referrer),
+    landingPage: field(body.landingPage),
     receivedAt: new Date().toISOString(),
   };
 
@@ -126,6 +139,14 @@ export async function POST(request: Request) {
     sendEmail(enquiry),
     sendWebhook(enquiry),
   ]);
+
+  // Acknowledge the enquirer only once the lead itself is safely delivered, and
+  // never let a failed acknowledgement turn a delivered lead into an error.
+  if (results.some((r) => r.status === "fulfilled" && r.value)) {
+    await sendAutoReply(enquiry).catch((error) => {
+      console.error("[enquiry] auto-reply failed:", error);
+    });
+  }
 
   const delivered = results.some((r) => r.status === "fulfilled" && r.value);
   const failed = results.find(
@@ -174,6 +195,16 @@ async function sendEmail(enquiry: Enquiry): Promise<boolean> {
     )
     .join("");
 
+  // Explicit plain-text part: Resend would otherwise derive one from the
+  // table HTML, which runs every label into its value.
+  const text = [
+    "NEW PROJECT ENQUIRY",
+    "",
+    ...Object.entries(enquiry)
+      .filter(([, value]) => value)
+      .map(([key, value]) => `${key}: ${value}`),
+  ].join("\n");
+
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -184,13 +215,14 @@ async function sendEmail(enquiry: Enquiry): Promise<boolean> {
       from,
       to: [to],
       reply_to: enquiry.email,
-      subject: `Enquiry - ${enquiry.name}${
-        enquiry.company ? ` (${enquiry.company})` : ""
-      } · ${enquiry.projectType}`,
+      subject: `[Lead] ${enquiry.projectType} - ${enquiry.name}${
+        enquiry.country ? `, ${enquiry.country}` : ""
+      }`,
       html: `<div style="font-family:ui-sans-serif,system-ui,sans-serif;font-size:14px;line-height:1.6">
   <h2 style="margin:0 0 16px">New project enquiry</h2>
   <table style="border-collapse:collapse">${rows}</table>
 </div>`,
+      text,
     }),
   });
 
@@ -199,6 +231,64 @@ async function sendEmail(enquiry: Enquiry): Promise<boolean> {
   }
 
   return true;
+}
+
+/**
+ * Short acknowledgement to the enquirer, from the same verified domain.
+ * Transactional only: no marketing, no tracking links. Replies go to the
+ * studio inbox. Failures are logged by the caller and never surfaced.
+ */
+async function sendAutoReply(enquiry: Enquiry): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.ENQUIRY_FROM_EMAIL;
+  const replyTo = process.env.ENQUIRY_TO_EMAIL ?? site.contact.email;
+  if (!apiKey || !from) return;
+
+  const firstName = enquiry.name.split(/\s+/)[0];
+  const processUrl = `${site.url}/process`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    "Thanks for getting in touch with Catalyst Labs. We have your enquiry and will reply personally within one business day (we work on IST, UTC+5:30).",
+    "",
+    "What happens next:",
+    "1. We read your brief and may come back with a question or two.",
+    "2. If there looks to be a fit, we book a short call.",
+    "3. After that you receive a written scope and a fixed proposal.",
+    "",
+    `How an engagement runs, stage by stage: ${processUrl}`,
+    "",
+    "If anything is urgent, just reply to this email.",
+    "",
+    `${site.founder.name}`,
+    `${site.name}, ${site.location.city}`,
+    site.url,
+  ].join("\n");
+
+  const html = `<div style="font-family:ui-sans-serif,system-ui,sans-serif;font-size:14px;line-height:1.6">${text
+    .split("\n")
+    .map((line) => (line ? `<p style="margin:0 0 10px">${escapeHtml(line)}</p>` : ""))
+    .join("")}</div>`;
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: [enquiry.email],
+      reply_to: replyTo,
+      subject: "We received your enquiry - Catalyst Labs",
+      html,
+      text,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Resend auto-reply responded ${response.status}`);
+  }
 }
 
 /** Returns false when unconfigured; throws when configured and failing. */

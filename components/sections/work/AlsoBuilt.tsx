@@ -108,7 +108,7 @@ export function AlsoBuilt() {
               held open rather than one more finished project. */}
           <div>
             <Link
-              href="/contact"
+              href="/contact?source=work-open-slot"
               className="group flex h-full min-h-[15rem] flex-col items-start justify-center gap-3 rounded-[26px] border-[3px] border-dashed border-line-strong p-7 text-paper transition-colors duration-(--duration-base) hover:border-paper"
             >
               <span
