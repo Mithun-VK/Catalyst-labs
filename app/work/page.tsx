@@ -5,6 +5,7 @@ import { World } from "@/components/worlds/World";
 import { WorksHero } from "@/components/sections/work/WorksHero";
 import { PosterIndex } from "@/components/sections/work/PosterIndex";
 import { WorksShowcase } from "@/components/sections/work/showcase/WorksShowcase";
+import { Testimonials } from "@/components/sections/work/Testimonials";
 import { AlsoBuilt } from "@/components/sections/work/AlsoBuilt";
 import { CTABand } from "@/components/sections/CTABand";
 import { projects } from "@/content/projects";
@@ -12,7 +13,7 @@ import { projects } from "@/content/projects";
 export const metadata: Metadata = buildMetadata({
   title: "Our Work: Systems We Build & How | Catalyst Labs",
   description:
-    "Fraud scoring in production, a quantitative trading stack, a compliance platform and live client sites. Real engineering detail, no invented client claims.",
+    "Fraud scoring in production, a quantitative trading stack, a compliance platform, a fashion storefront and live client sites. Real engineering detail, no invented client claims.",
   path: "/work",
 });
 
@@ -48,6 +49,7 @@ export default function WorkPage() {
       </div>
 
       <AlsoBuilt />
+      <Testimonials />
       <CTABand
         title="Want one of these against your process?"
         accent="Not a generic one."

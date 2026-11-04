@@ -99,7 +99,7 @@ export function CTABand({
                 label="Based in"
                 value={`${site.location.city}, ${site.location.country}`}
               />
-              <Row label="Hours" value="Mon–Sat · IST (UTC+5:30)" />
+              <Row label="Hours" value="10:00–22:00 · Daily · IST" />
             </div>
           </Reveal>
         </div>

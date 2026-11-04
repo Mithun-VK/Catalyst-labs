@@ -266,6 +266,15 @@ function PosterRow({ project, index }: { project: Project; index: number }) {
               </Link>
             </Reveal>
           ) : null}
+
+          {project.caseStudy ? (
+            <Link
+              href={`/work/${project.caseStudy}`}
+              className="mt-5 inline-block text-small text-paper underline underline-offset-4 hover:text-ember"
+            >
+              Read the case study
+            </Link>
+          ) : null}
         </div>
       </article>
     </li>

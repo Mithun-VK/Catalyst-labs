@@ -73,7 +73,7 @@ export const site = {
    * shown on the site. `overlapHours` e.g. "14:00-23:00 IST (by appointment)".
    */
   internationalClients: {
-    overlapHours: "",
+    overlapHours: "10:00 AM - 10:00 PM IST, every day",
     milestonePayments: false,
   },
 

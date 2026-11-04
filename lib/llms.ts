@@ -2,6 +2,7 @@ import { site } from "@/lib/site";
 import { services } from "@/content/services";
 import { projects, alsoBuilt, STATUS_LABEL } from "@/content/projects";
 import { processStages } from "@/content/process";
+import { caseStudies } from "@/content/case-studies";
 import { siteFaqs } from "@/lib/faq";
 
 const u = (path = "") => `${site.url}${path}`;
@@ -64,6 +65,21 @@ export function buildLlmsFullTxt(): string {
     );
     if (p.proof.length) out.push(...p.proof.map((x) => `- ${x}`), "");
     out.push("Technologies: " + p.technology.join(", "), "");
+  }
+
+  out.push("## Case studies", "");
+  for (const c of caseStudies) {
+    out.push(
+      `### ${c.title}`,
+      `URL: ${u(`/work/${c.slug}`)}`,
+      "",
+      c.summary,
+      "",
+      ...c.results.map((r) => `- ${r.value} ${r.label} (${r.source})`),
+      "",
+      ...c.notes.map((n) => `Note: ${n}`),
+      ""
+    );
   }
 
   out.push("## Process", "");

@@ -101,7 +101,8 @@ export function WorksHero() {
             }}
           >
             Fraud scoring in production. A quantitative trading stack. A tax
-            compliance platform. Three live client sites.
+            compliance platform. A clothing brand&rsquo;s storefront behind
+            ₹4 lakh in ten days.
           </p>
           <p className="text-body text-mute lg:col-span-4 lg:col-start-9">
             Every entry below is real and shipped. The numbers are recorded

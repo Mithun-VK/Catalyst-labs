@@ -32,6 +32,8 @@ export type Project = {
   /** Public URL, only for sites anyone can visit. */
   href?: string;
   year: string;
+  /** Slug of a full case study under /work/[slug], when one exists. */
+  caseStudy?: string;
   /** Lifted onto the home page's selected-work index. */
   featured?: boolean;
   /**
@@ -69,6 +71,27 @@ export const STATUS_LABEL: Record<ProjectStatus, string> = {
  * only place that has to change.
  */
 export const projects: Project[] = [
+  {
+    slug: "inego",
+    accent: "mint",
+    featured: true,
+    caseStudy: "inego",
+    name: "INEGO",
+    domain: "Fashion e-commerce",
+    status: "live",
+    summary:
+      "The online storefront for INEGO, a clothing brand owned by TAIG Fashion Profiles, built to take paid-social traffic.",
+    detail:
+      "Catalyst Labs built the site and provided the technical support behind the brand's launch, while ScaleUp Marketing Agency ran the marketing. The brand reported more than ₹4 lakh in revenue within ten days (client-reported, November 2026).",
+    proof: [
+      "Over ₹4 lakh revenue in 10 days, reported by the brand",
+      "16,080 visitors and 51,194 page views in 30 days (Vercel Analytics)",
+      "Instagram and Facebook were the largest traffic sources",
+    ],
+    technology: ["Vercel"],
+    href: "https://inego.in",
+    year: "2026",
+  },
   {
     slug: "fashion-profiles",
     accent: "pink",
@@ -113,15 +136,14 @@ export const projects: Project[] = [
     featured: true,
     name: "TaxVault v3",
     domain: "Financial compliance",
-    status: "production",
+    status: "building",
     summary:
       "The core platform for a tax and compliance product - schema, data layer and domain logic.",
     detail:
-      "Built through a full production cycle: versioned migrations, deterministic seeding for reproducible environments, and a code review pass across the domain layer before sign-off. The test suite covers the tax computation paths where correctness is not negotiable.",
+      "Under active development, with versioned migrations, deterministic seeding for reproducible environments, and a code review pass across the domain layer before sign-off. The test suite covers the tax computation paths where correctness is not negotiable.",
     proof: [
       "289 automated tests passing",
       "Versioned migrations with deterministic seed data",
-      "Reviewed through a full production cycle",
     ],
     technology: ["TypeScript", "Node.js", "PostgreSQL", "Prisma"],
     year: "2026",
@@ -217,9 +239,9 @@ export const alsoBuilt: Project[] = [
     domain: "Quantitative research",
     status: "building",
     summary:
-      "A market regime research engine, delivered across a structured sprint roadmap.",
+      "The internal financial analysis software used inside Ark Angel, developed by Catalyst Labs.",
     detail:
-      "Regime labelling and detection over market data, built out across six delivered sprints with research phases gated on validation rather than on schedule.",
+      "A market regime research engine: regime labelling and detection over market data, built out across six delivered sprints with research phases gated on validation rather than on schedule. It is the analysis layer Ark Angel relies on.",
     proof: ["Six sprints delivered", "Validation-gated phase progression"],
     technology: ["Python", "pandas", "Machine learning"],
     year: "2026",

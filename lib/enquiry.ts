@@ -19,10 +19,10 @@ export type Currency = (typeof CURRENCIES)[number];
 
 /** Budget bands per currency. Ranges are enquiry guidance, not price quotes. */
 export const BUDGETS_BY_CURRENCY: Record<Currency, readonly string[]> = {
-  USD: ["Under $3k", "$3k – $10k", "$10k – $30k", "$30k+", "Needs discussion"],
-  GBP: ["Under £2.5k", "£2.5k – £8k", "£8k – £25k", "£25k+", "Needs discussion"],
-  EUR: ["Under €3k", "€3k – €9k", "€9k – €28k", "€28k+", "Needs discussion"],
-  INR: ["Under ₹2L", "₹2L – ₹5L", "₹5L – ₹15L", "₹15L+", "Needs discussion"],
+  USD: ["Under $2k", "$2k – $6k", "$6k – $14k", "$14k+", "Needs discussion"],
+  GBP: ["Under £1.5k", "£1.5k – £4.5k", "£4.5k – £10k", "£10k+", "Needs discussion"],
+  EUR: ["Under €1.8k", "€1.8k – €5.4k", "€5.4k – €12.5k", "€12.5k+", "Needs discussion"],
+  INR: ["Under ₹40k", "₹40k – ₹1.5L", "₹1.5L – ₹5L", "₹5L+", "Needs discussion"],
 };
 
 export const COUNTRIES = [
