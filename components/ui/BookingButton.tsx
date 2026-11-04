@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { getCalApi } from "@calcom/embed-react";
 import { Button } from "@/components/ui/Button";
+import { useCalPopup } from "@/components/ui/useCalPopup";
 import { site } from "@/lib/site";
 
 /**
@@ -10,20 +9,10 @@ import { site } from "@/lib/site";
  * the visitor never leaves the site. Renders nothing unless
  * NEXT_PUBLIC_BOOKING_URL is set.
  *
- * The embed script loads after hydration. Until it has (or if it is blocked by
- * an ad blocker or network), a click opens the plain booking page in a new tab,
- * so the button always does something useful.
+ * Until the embed script has loaded (or if it is blocked by an ad blocker or
+ * the network), a click opens the plain booking page in a new tab, so the
+ * button always does something useful.
  */
-
-/** "https://cal.com/catalyst-labs/30min" -> "catalyst-labs/30min" */
-function calLinkFrom(url: string): string {
-  try {
-    return new URL(url).pathname.replace(/^\/+|\/+$/g, "");
-  } catch {
-    return "";
-  }
-}
-
 export function BookingButton({
   location,
   variant = "secondary",
@@ -36,29 +25,7 @@ export function BookingButton({
   className?: string;
 }) {
   const url = site.booking.url;
-  const calLink = calLinkFrom(url);
-  const ready = useRef(false);
-
-  useEffect(() => {
-    if (!calLink) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const cal = await getCalApi({ namespace: "30min" });
-        cal("ui", {
-          theme: "dark",
-          hideEventTypeDetails: false,
-          layout: "month_view",
-        });
-        if (!cancelled) ready.current = true;
-      } catch {
-        // Blocked or offline: the click fallback below still works.
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [calLink]);
+  const { calLink, ready } = useCalPopup(url);
 
   if (!url || !calLink) return null;
 

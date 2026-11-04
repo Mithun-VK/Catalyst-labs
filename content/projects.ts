@@ -32,6 +32,12 @@ export type Project = {
   /** Public URL, only for sites anyone can visit. */
   href?: string;
   year: string;
+  /** Short sticker on the poster, e.g. a standout feature. */
+  sticker?: string;
+  /** Extra real screenshots, shown fanned out behind the main one. */
+  gallery?: { src: string; alt: string }[];
+  /** Headline numbers for the poster. Each must also appear in `proof`. */
+  stats?: { value: string; label: string }[];
   /** Slug of a full case study under /work/[slug], when one exists. */
   caseStudy?: string;
   /** Lifted onto the home page's selected-work index. */
@@ -76,19 +82,32 @@ export const projects: Project[] = [
     accent: "mint",
     featured: true,
     caseStudy: "inego",
+    sticker: "Virtual try-on built in",
     name: "INEGO",
     domain: "Fashion e-commerce",
     status: "live",
     summary:
-      "The online storefront for INEGO, a clothing brand owned by TAIG Fashion Profiles, built to take paid-social traffic.",
+      "The online store for INEGO, a clothing brand owned by TAIG Fashion Profiles, with a virtual try-on so shoppers can try products before buying.",
     detail:
-      "Catalyst Labs built the site and provided the technical support behind the brand's launch, while ScaleUp Marketing Agency ran the marketing. The brand reported more than ₹4 lakh in revenue within ten days (client-reported, November 2026).",
+      "Catalyst Labs built the store and its virtual try-on feature and provided the technical support behind the brand's launch, while ScaleUp Marketing Agency ran the marketing. The brand reported more than ₹4 lakh in revenue within ten days (client-reported, November 2026).",
     proof: [
       "Over ₹4 lakh revenue in 10 days, reported by the brand",
       "16,080 visitors and 51,194 page views in 30 days (Vercel Analytics)",
+      "Virtual try-on built by Catalyst Labs",
       "Instagram and Facebook were the largest traffic sources",
     ],
-    technology: ["Vercel"],
+    stats: [
+      { value: "₹4 lakh+", label: "revenue in 10 days (brand-reported)" },
+      { value: "16,080", label: "visitors in 30 days" },
+      { value: "51,194", label: "page views in 30 days" },
+    ],
+    image: "/projects/inego.webp",
+    gallery: [
+      { src: "/projects/inego-offers.webp", alt: "INEGO offers page with sale countdown and promo code" },
+      { src: "/projects/inego-bestsellers.webp", alt: "INEGO best sellers grid with discounts and colour options" },
+      { src: "/projects/inego-colour.webp", alt: "INEGO shop-by-colour browsing" },
+    ],
+    technology: ["Vercel", "Virtual try-on"],
     href: "https://inego.in",
     year: "2026",
   },
@@ -125,6 +144,10 @@ export const projects: Project[] = [
       "Two strategies validated through the promotion gate",
       "Backtests model transaction cost and slippage explicitly",
     ],
+    stats: [
+      { value: "102", label: "automated tests passing" },
+      { value: "2", label: "strategies through the promotion gate" },
+    ],
     technology: ["Python", "pandas", "NumPy", "PostgreSQL", "Backtesting"],
     href: "https://arkangel.co.in",
     image: "/projects/ark-angel.png",
@@ -145,6 +168,7 @@ export const projects: Project[] = [
       "289 automated tests passing",
       "Versioned migrations with deterministic seed data",
     ],
+    stats: [{ value: "289", label: "automated tests passing" }],
     technology: ["TypeScript", "Node.js", "PostgreSQL", "Prisma"],
     year: "2026",
   },
@@ -182,6 +206,7 @@ export const projects: Project[] = [
       "Deployed on AWS EC2, ap-south-1 (Mumbai)",
       "Full test suite passing",
     ],
+    stats: [{ value: "0.908", label: "ROC AUC, measured on the deployed service" }],
     technology: ["Python", "ONNX", "FastAPI", "AWS EC2", "PostgreSQL"],
     year: "2026",
   },

@@ -40,16 +40,22 @@ export const caseStudies: CaseStudy[] = [
     roles: [
       { party: "TAIG Fashion Profiles", role: "Brand owner" },
       { party: "ScaleUp Marketing Agency", role: "Marketing and paid campaigns" },
-      { party: "Catalyst Labs", role: "Built the website and provided technical support" },
+      { party: "Catalyst Labs", role: "Built the website and the virtual try-on feature, and provided technical support" },
     ],
     summary:
-      "INEGO is a clothing brand owned by TAIG Fashion Profiles. Catalyst Labs built inego.in and supported it technically while ScaleUp Marketing Agency drove traffic to it. The brand reported more than ₹4 lakh in revenue within ten days.",
+      "INEGO is a clothing brand owned by TAIG Fashion Profiles. Catalyst Labs built inego.in, including a virtual try-on feature, and supported it technically while ScaleUp Marketing Agency drove traffic to it. The brand reported more than ₹4 lakh in revenue within ten days.",
     sections: [
       {
         heading: "The brief",
         body: [
           "A consumer clothing brand sells on attention. Campaigns on Instagram and Facebook send visitors in bursts, so the site behind them has to load quickly, present the range clearly and make the offer easy to find.",
-          "The storefront was built for that: an offers page, category pages for shirts, polos and T-shirts, and a contact page, so a visitor arriving from an ad reaches products in a click or two.",
+          "The storefront was built for that: an offers page with a sale countdown and promo code, category pages for shirts, polos and T-shirts, shop-by-colour browsing, best sellers with colour and size options, and a contact page, so a visitor arriving from an ad reaches products in a click or two.",
+        ],
+      },
+      {
+        heading: "Virtual try-on",
+        body: [
+          "Catalyst Labs also built a virtual try-on feature into the store, so shoppers can try products on before they buy. Product cards offer a \"Try it on\" action alongside colour and size selection.",
         ],
       },
       {

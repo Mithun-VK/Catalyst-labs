@@ -20,3 +20,6 @@ next-env.d.ts
 .firecrawl/
 
 .vercel
+
+# verification builds
+/.next-verify/

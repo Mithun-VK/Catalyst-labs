@@ -24,6 +24,9 @@ const securityHeaders = [
 const CANONICAL_HOST = "catalystlabs.co.in";
 
 const nextConfig: NextConfig = {
+  // Lets a verification build use its own folder (NEXT_DIST_DIR=.next-verify)
+  // so it can never clobber a running `next dev` server's .next cache.
+  distDir: process.env.NEXT_DIST_DIR ?? ".next",
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,

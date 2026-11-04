@@ -202,6 +202,8 @@ export default async function CaseStudyPage({
       </Section>
 
       <CTABand
+        variant="poster"
+        location="case_study"
         title="Want a launch that holds up under traffic?"
         accent="Tell us about it."
         lead="Describe what you are launching and when. We will tell you what it takes, and whether we are the right team."

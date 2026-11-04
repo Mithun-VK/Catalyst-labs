@@ -3,8 +3,7 @@ import { breadcrumbSchema, buildMetadata } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { World } from "@/components/worlds/World";
 import { WorksHero } from "@/components/sections/work/WorksHero";
-import { PosterIndex } from "@/components/sections/work/PosterIndex";
-import { WorksShowcase } from "@/components/sections/work/showcase/WorksShowcase";
+import { WorksDeck } from "@/components/sections/work/deck/WorksDeck";
 import { Testimonials } from "@/components/sections/work/Testimonials";
 import { AlsoBuilt } from "@/components/sections/work/AlsoBuilt";
 import { CTABand } from "@/components/sections/CTABand";
@@ -35,22 +34,13 @@ export default function WorkPage() {
       <JsonLd data={breadcrumbSchema([{ name: "Works", path: "/work" }])} />
       <WorksHero />
 
-      {/* Desktop (>=1024px): pinned, scroll-scrubbed case-study cinema. Below
-          that - and under prefers-reduced-motion, handled inside the
-          component itself - the same content in a simpler, unpinned scroll
-          reveal (PosterIndex) takes over. Both render the same `projects`
-          data; only the presentation differs, so nothing here can drift out
-          of sync with content/projects.ts. */}
-      <div className="hidden lg:block">
-        <WorksShowcase projects={projects} />
-      </div>
-      <div className="lg:hidden">
-        <PosterIndex />
-      </div>
+      <WorksDeck projects={projects} />
 
       <AlsoBuilt />
       <Testimonials />
       <CTABand
+        variant="poster"
+        location="works"
         title="Want one of these against your process?"
         accent="Not a generic one."
         lead="Every build starts by mapping how the work actually moves through your business. The architecture follows from that, not from a template."

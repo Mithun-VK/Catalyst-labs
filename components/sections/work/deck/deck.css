@@ -1,0 +1,57 @@
+/* WORKS DECK
+   Stacking poster deck. Native scroll only: each poster is position: sticky
+   and the next one slides over it. Stacking is enabled ONLY where a poster is
+   guaranteed to fit the viewport (wide AND tall); everywhere else the posters
+   are ordinary blocks in normal flow, so no content can ever be cut off. */
+
+.deck {
+  --deck-top: 4rem; /* condensed navbar height */
+  --deck-bar: 2.75rem; /* horizontal jump bar, below xl */
+}
+
+@media (min-width: 80rem) {
+  .deck {
+    --deck-bar: 0rem; /* xl: the rail is a fixed vertical strip instead */
+  }
+}
+
+.deck-number {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--color-paper);
+  opacity: 0.45;
+}
+
+@media (min-width: 64rem) and (min-height: 46rem) {
+  .deck-card {
+    position: sticky;
+    top: calc(var(--deck-top) + var(--deck-bar));
+    min-height: calc(100svh - var(--deck-top) - var(--deck-bar));
+    display: flex;
+    align-items: center;
+    border-radius: 2rem 2rem 0 0;
+  }
+  /* Long-form text is dropped while stacked so a poster always fits one
+     screen; the same text is shown in full in normal-flow mode. */
+  .deck-detail {
+    display: none;
+  }
+}
+
+.deck-fan-a {
+  transform: rotate(-4deg);
+}
+.deck-fan-b {
+  transform: rotate(3deg);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .deck-fan-a,
+  .deck-fan-b {
+    transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .deck-card:hover .deck-fan-a {
+    transform: rotate(-6deg) translateY(-6px);
+  }
+  .deck-card:hover .deck-fan-b {
+    transform: rotate(5deg) translateY(-6px);
+  }
+}

@@ -1,0 +1,315 @@
+/* CALL-TO-ACTION BAND
+   One structure on every page. Each design world sets four variables, and the
+   band's motion and shape follow them:
+     --cta-dur     how long hover/press transitions take
+     --cta-radius  corner softness
+     --cta-lift    how far a tile rises on hover
+   precision (default) crisp and quick; studio soft and slower; atelier fine
+   and very slow; system instrument-fast. Poster (the Works page) is a full
+   comic treatment, switched on by data-variant="poster". */
+
+.cta-band {
+  --cta-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --cta-dur: 220ms;
+  --cta-radius: 0px;
+  --cta-lift: -2px;
+}
+[data-world="studio"] .cta-band {
+  --cta-dur: 420ms;
+  --cta-radius: 1.1rem;
+  --cta-lift: -4px;
+}
+[data-world="atelier"] .cta-band {
+  --cta-dur: 640ms;
+  --cta-radius: 0.125rem;
+  --cta-lift: 0px;
+}
+[data-world="system"] .cta-band {
+  --cta-dur: 150ms;
+  --cta-radius: 0px;
+  --cta-lift: 0px;
+}
+
+.cta-panel {
+  border-radius: var(--cta-radius);
+}
+
+/* ---- path tiles --------------------------------------------------------- */
+.cta-tile {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--cta-radius);
+  background: color-mix(in srgb, var(--color-ink-raised) 60%, transparent);
+  color: var(--color-paper);
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    transform var(--cta-dur) var(--cta-ease),
+    border-color var(--cta-dur) var(--cta-ease),
+    background-color var(--cta-dur) var(--cta-ease),
+    box-shadow var(--cta-dur) var(--cta-ease);
+}
+.cta-tile:hover {
+  transform: translateY(var(--cta-lift));
+  border-color: var(--color-ember);
+  background: color-mix(in srgb, var(--color-ember) 7%, transparent);
+}
+.cta-tile:focus-visible,
+.cta-chip:focus-visible {
+  outline: 2px solid var(--color-ember);
+  outline-offset: 3px;
+}
+.cta-tile-icon {
+  border-radius: calc(var(--cta-radius) * 0.7);
+}
+.cta-arrow {
+  transition: transform var(--cta-dur) var(--cta-ease);
+}
+.cta-tile:hover .cta-arrow {
+  transform: translateX(4px);
+}
+
+.cta-tag {
+  border: 1px solid var(--color-line-strong);
+  padding: 0.1rem 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-mute);
+  border-radius: calc(var(--cta-radius) * 0.4);
+}
+.cta-tag.is-hot {
+  border-color: var(--color-ember);
+  color: var(--color-ember);
+}
+
+/* ---- chips -------------------------------------------------------------- */
+.cta-chip {
+  height: 2.5rem;
+  padding: 0 0.9rem;
+  border: 1px solid var(--color-line);
+  border-radius: calc(var(--cta-radius) * 0.6);
+  font-size: 0.875rem;
+  color: var(--color-mute);
+  cursor: pointer;
+  transition:
+    border-color var(--cta-dur) var(--cta-ease),
+    background-color var(--cta-dur) var(--cta-ease),
+    color var(--cta-dur) var(--cta-ease),
+    transform var(--cta-dur) var(--cta-ease);
+}
+.cta-chip:hover {
+  border-color: var(--color-line-strong);
+  color: var(--color-paper);
+}
+.cta-chip:active {
+  transform: scale(0.97);
+}
+.cta-chip.is-on {
+  border-color: var(--color-ember);
+  background: color-mix(in srgb, var(--color-ember) 12%, transparent);
+  color: var(--color-paper);
+}
+
+/* ---- "after you send" timeline ----------------------------------------- */
+.cta-steps {
+  position: relative;
+  display: grid;
+  gap: 1.25rem;
+  padding-left: 2.25rem;
+}
+.cta-steps::before {
+  content: "";
+  position: absolute;
+  left: 0.8125rem;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  width: 1px;
+  background: var(--color-line-strong);
+  transform-origin: top;
+}
+.cta-step {
+  position: relative;
+}
+.cta-step-dot {
+  position: absolute;
+  left: -2.25rem;
+  top: 0;
+  display: grid;
+  width: 1.625rem;
+  height: 1.625rem;
+  place-items: center;
+  border: 1px solid var(--color-line-strong);
+  border-radius: calc(var(--cta-radius) * 0.5);
+  background: var(--color-ink);
+  color: var(--color-mute);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cta-next[data-inview] .cta-steps::before {
+    transition: transform 1100ms var(--cta-ease);
+  }
+  .cta-next[data-inview="false"] .cta-steps::before {
+    transform: scaleY(0);
+  }
+  .cta-next[data-inview] .cta-step {
+    transition:
+      opacity 520ms var(--cta-ease) calc(var(--i) * 220ms),
+      transform 520ms var(--cta-ease) calc(var(--i) * 220ms);
+  }
+  .cta-next[data-inview="false"] .cta-step {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  .cta-next[data-inview] .cta-step-dot {
+    transition:
+      border-color 400ms var(--cta-ease) calc(var(--i) * 220ms + 200ms),
+      color 400ms var(--cta-ease) calc(var(--i) * 220ms + 200ms);
+  }
+  .cta-next[data-inview="true"] .cta-step-dot {
+    border-color: var(--color-ember);
+    color: var(--color-ember);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta-next .cta-step-dot {
+    border-color: var(--color-ember);
+    color: var(--color-ember);
+  }
+}
+
+/* ---- proof ------------------------------------------------------------- */
+@keyframes cta-fact-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cta-fact {
+    animation: cta-fact-in 520ms var(--cta-ease) both;
+  }
+}
+
+/* ---- success check ----------------------------------------------------- */
+.cta-check-path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+@keyframes cta-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cta-check-path {
+    stroke-dashoffset: 1;
+    animation: cta-draw 600ms ease-out 150ms forwards;
+  }
+}
+
+/* =========================================================================
+   POSTER VARIANT (Works) - full comic
+   ========================================================================= */
+
+.cta-marquee {
+  border-block: 3px solid var(--color-paper);
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.cta-band[data-variant="poster"] .cta-tile {
+  border: 3px solid var(--color-paper);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--on-surface);
+  box-shadow: 6px 6px 0 0 var(--color-paper);
+  transform: rotate(var(--tilt, 0deg));
+}
+.cta-band[data-variant="poster"] .cta-tile:hover {
+  transform: translate(-3px, -3px) rotate(0deg);
+  border-color: var(--color-paper);
+  background: var(--surface);
+  box-shadow: 9px 9px 0 0 var(--color-paper);
+}
+.cta-band[data-variant="poster"] .cta-tile:active {
+  transform: translate(6px, 6px) rotate(0deg);
+  box-shadow: 0 0 0 0 var(--color-paper);
+}
+.cta-band[data-variant="poster"] .cta-tile-icon,
+.cta-band[data-variant="poster"] .cta-tag {
+  border: 2px solid var(--color-paper);
+}
+.cta-band[data-variant="poster"] .cta-tag {
+  border-radius: 999px;
+  color: var(--color-paper);
+}
+.cta-band[data-variant="poster"] .cta-tag.is-hot {
+  background: var(--color-paper);
+  color: var(--surface);
+}
+
+.cta-band[data-variant="poster"] .cta-chip {
+  border: 2px solid var(--color-paper);
+  border-radius: 999px;
+  color: var(--color-paper);
+}
+.cta-band[data-variant="poster"] .cta-chip.is-on {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.cta-band[data-variant="poster"] .cta-step-dot {
+  border: 2px solid var(--color-paper);
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.cta-sticker {
+  padding: 0.75rem 0.9rem;
+  border: 3px solid var(--color-paper);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--on-surface);
+  box-shadow: 5px 5px 0 0 var(--color-paper);
+  transform: rotate(var(--tilt, 0deg));
+  cursor: pointer;
+  transition:
+    transform 260ms var(--cta-ease),
+    box-shadow 260ms var(--cta-ease);
+}
+.cta-sticker:hover {
+  transform: rotate(0deg) scale(1.06);
+  box-shadow: 8px 8px 0 0 var(--color-paper);
+}
+@keyframes cta-bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -5px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cta-sticker {
+    animation: cta-bob 3.6s ease-in-out var(--bob, 0s) infinite;
+  }
+  .cta-sticker:hover {
+    animation-play-state: paused;
+  }
+}
