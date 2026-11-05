@@ -2,13 +2,16 @@ import type { Metadata } from "next";
 import { breadcrumbSchema, buildMetadata } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { World } from "@/components/worlds/World";
-import { AtelierHero } from "@/components/sections/services/AtelierHero";
-import { CatalystSystemMap } from "@/components/sections/services/CatalystSystemMap";
-import { ServicesSection } from "@/components/sections/services/ServicesSection";
-import { Impact } from "@/components/sections/Impact";
-import { EngineeringProcess } from "@/components/sections/services/EngineeringProcess";
-import { DeliverySignals } from "@/components/sections/services/DeliverySignals";
-import { WorksTransition } from "@/components/sections/services/WorksTransition";
+import { GlassField } from "@/components/glass/GlassField";
+import { GlassAurora } from "@/components/glass/GlassAurora";
+import { GlassHero } from "@/components/sections/services/GlassHero";
+import { ServicesSubnav } from "@/components/sections/services/ServicesSubnav";
+import { PracticeExplorer } from "@/components/sections/services/PracticeExplorer";
+import { ImpactToggle } from "@/components/sections/services/ImpactToggle";
+import { ProcessTimeline } from "@/components/sections/services/ProcessTimeline";
+import { StackExplorer } from "@/components/sections/services/StackExplorer";
+import { ProofCards } from "@/components/sections/services/ProofCards";
+import { ServicesFaq } from "@/components/sections/services/ServicesFaq";
 import { CTABand } from "@/components/sections/CTABand";
 
 export const metadata: Metadata = buildMetadata({
@@ -19,46 +22,48 @@ export const metadata: Metadata = buildMetadata({
 });
 
 /**
- * SERVICES - the atelier world, full narrative.
+ * SERVICES - the atelier world in liquid glass, built for density.
  *
- * Problem -> Engineering -> System -> Outcome, as eight sections rather than
- * a list of six practices:
+ * Every section answers one question and lets the visitor act on it:
  *
- *  01  Hero            - the claim
- *  02  System Map       - the practices, as one connected system
- *  03  Service Index     - each practice in full (ServicesSection - the
- *                         pinned, GSAP-driven experience built separately)
- *  --  Before -> After   - what changes (Impact, reused verbatim from /ai;
- *                         the same real state-change ledger, not a second
- *                         invented version of it)
- *  04  Process           - how it gets built (the real five stages from
- *                         content/process.ts)
- *  05  Delivery          - what can be checked (real facts only)
- *  06  Proof             - the bridge into /work
- *  --  Closing CTA        - the site's standard contact conversion, present
- *                         on every page
+ *  Hero      which practice is mine?        (service finder + terms band)
+ *  --        where is everything?           (sticky section bar)
+ *  01        what do you do, in full?       (bento explorer, expand in place)
+ *  02        what changes for me?           (before / after switch)
+ *  03        how does it get built?         (timeline + shared detail pane)
+ *  04        on what technology?            (layer tabs, "used in" lookup)
+ *  05        can you prove it?              (three real projects)
+ *  06        what about cost, data, time?   (FAQ, FAQPage schema)
+ *  Start     the shared CTA band, tightened on this page
  *
- * Impact is reused rather than rebuilt: it is already exactly a real,
- * evidence-based "before/after" component, so a second one built for this
- * page would either duplicate it or invent a claim the first one does not
- * make.
+ * Sections use a compact rhythm (SVC_SECTION in SvcHeading.tsx) instead of
+ * the site-wide 11rem section padding, and no section repeats another's
+ * content. The glass layer and its accessibility/performance rules live in
+ * components/glass/glass.css.
  */
 export default function ServicesPage() {
   return (
-    <World id="atelier">
+    <World id="atelier" className="bg-transparent">
       <JsonLd data={breadcrumbSchema([{ name: "Services", path: "/services" }])} />
-      <AtelierHero />
-      <CatalystSystemMap />
-      <ServicesSection />
-      <Impact />
-      <EngineeringProcess />
-      <DeliverySignals />
-      <WorksTransition />
-      <CTABand
-        title="Know which of these you need?"
-        accent="Or want help deciding?"
-        lead="Describe the problem in your own words. We will tell you which practice it belongs to, what it would take, and whether it is worth building at all."
-      />
+      <GlassAurora />
+      <GlassField>
+        <GlassHero />
+        <ServicesSubnav />
+        <PracticeExplorer />
+        <ImpactToggle />
+        <ProcessTimeline />
+        <StackExplorer />
+        <ProofCards />
+        <ServicesFaq />
+        <div id="start" className="scroll-mt-32">
+          <CTABand
+            title="Know which of these you need?"
+            accent="Or want help deciding?"
+            lead="Describe the problem in your own words. We will tell you which practice it belongs to, what it would take, and whether it is worth building at all."
+            location="services"
+          />
+        </div>
+      </GlassField>
     </World>
   );
 }

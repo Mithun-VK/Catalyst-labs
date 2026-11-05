@@ -1,0 +1,343 @@
+/* GLASS LAYER - Liquid Glass + Glassmorphism for the Services page
+   -------------------------------------------------------------------------
+   Art direction: stay inside the atelier world (ivory ground, deep teal, gold)
+   and add the one thing glass needs - something to refract. A slow aurora of
+   teal, gold, lilac and blush sits behind everything; panels are frosted
+   panes floating at three depths over it.
+
+   Depth model (back to front):
+     0  aurora            fixed, never scrolls, so panes slide over colour
+     1  .glass            frosted pane: blur + saturate, 1px lit rim
+     2  .glass-dark       the one weighty pane per view, tinted deep teal
+     3  .glass-float      small chips that drift on their own clock
+
+   Rules this file keeps (from the accessibility + performance guidance):
+     - body text always sits on >= 0.58 white or >= 0.86 teal, so contrast
+       holds at the brightest point of the aurora
+     - only transform/opacity are animated; blur is static
+     - prefers-reduced-motion: no drift, no float, no pointer light
+     - prefers-reduced-transparency and no-backdrop-filter: near-opaque fills */
+
+[data-glass] {
+  --glass-blur: 20px;
+  --glass-sat: 165%;
+  --glass-radius: 1.5rem;
+  --glass-rim: rgb(255 255 255 / 0.85);
+  --glass-shadow:
+    0 1px 0 0 rgb(255 255 255 / 0.95) inset,
+    0 -1px 0 0 rgb(14 43 44 / 0.05) inset,
+    0 28px 60px -30px rgb(9 50 51 / 0.38),
+    0 3px 8px -2px rgb(9 50 51 / 0.07);
+  --glass-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---- aurora ------------------------------------------------------------- */
+.glass-aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 8% -10%, #f6f2e6 0%, transparent 60%),
+    linear-gradient(180deg, #f7f4ec 0%, #eef1ea 100%);
+}
+.glass-blob {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform;
+}
+.glass-blob.b-teal {
+  width: 62vmax;
+  height: 62vmax;
+  left: -18vmax;
+  top: -22vmax;
+  background: radial-gradient(closest-side, rgb(48 170 160 / 0.5), rgb(48 170 160 / 0));
+  animation: glass-drift-a 28s ease-in-out infinite alternate;
+}
+.glass-blob.b-gold {
+  width: 54vmax;
+  height: 54vmax;
+  right: -16vmax;
+  top: 4vmax;
+  background: radial-gradient(closest-side, rgb(232 192 112 / 0.55), rgb(232 192 112 / 0));
+  animation: glass-drift-b 34s ease-in-out infinite alternate;
+}
+.glass-blob.b-lilac {
+  width: 48vmax;
+  height: 48vmax;
+  left: 24vw;
+  bottom: -24vmax;
+  background: radial-gradient(closest-side, rgb(168 156 236 / 0.42), rgb(168 156 236 / 0));
+  animation: glass-drift-c 31s ease-in-out infinite alternate;
+}
+.glass-blob.b-blush {
+  width: 40vmax;
+  height: 40vmax;
+  right: 14vw;
+  bottom: -6vmax;
+  background: radial-gradient(closest-side, rgb(246 168 148 / 0.38), rgb(246 168 148 / 0));
+  animation: glass-drift-a 37s ease-in-out infinite alternate-reverse;
+}
+@keyframes glass-drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+  to   { transform: translate3d(7vmax, 5vmax, 0) scale(1.12) rotate(12deg); }
+}
+@keyframes glass-drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1.05) rotate(0deg); }
+  to   { transform: translate3d(-8vmax, 6vmax, 0) scale(0.92) rotate(-14deg); }
+}
+@keyframes glass-drift-c {
+  from { transform: translate3d(0, 0, 0) scale(0.95); }
+  to   { transform: translate3d(9vmax, -6vmax, 0) scale(1.1); }
+}
+
+/* ---- the pane ----------------------------------------------------------- */
+.glass {
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--glass-radius);
+  background: linear-gradient(
+    140deg,
+    rgb(255 255 255 / 0.8) 0%,
+    rgb(255 255 255 / 0.62) 55%,
+    rgb(255 255 255 / 0.7) 100%
+  );
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  border: 1px solid rgb(255 255 255 / 0.55);
+  box-shadow: var(--glass-shadow);
+  transition:
+    transform 420ms var(--glass-ease),
+    box-shadow 420ms var(--glass-ease);
+}
+/* Lit rim: a 1px gradient edge, bright at the top-left like a light source
+   sits there, fading through clear glass and catching again bottom-right. */
+.glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    145deg,
+    rgb(255 255 255 / 1) 0%,
+    rgb(255 255 255 / 0) 38%,
+    rgb(255 255 255 / 0) 62%,
+    rgb(255 255 255 / 0.65) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+/* Specular light that follows the pointer (set by GlassField). */
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(
+      360px circle at var(--mx, 50%) var(--my, 0%),
+      rgb(255 255 255 / 0.9),
+      rgb(255 255 255 / 0) 62%
+    ),
+    linear-gradient(
+      120deg,
+      rgb(96 214 202 / 0.16),
+      rgb(240 200 120 / 0.14) 50%,
+      rgb(176 160 255 / 0.16)
+    );
+  transition: opacity 360ms var(--glass-ease);
+}
+.glass[data-lit="true"]::before {
+  opacity: 1;
+}
+
+.glass-lift:hover,
+.glass-lift:focus-within {
+  transform: translateY(-4px);
+  box-shadow:
+    0 1px 0 0 rgb(255 255 255 / 0.95) inset,
+    0 -1px 0 0 rgb(14 43 44 / 0.05) inset,
+    0 38px 70px -30px rgb(9 50 51 / 0.45),
+    0 4px 10px -2px rgb(9 50 51 / 0.08);
+}
+
+/* A lighter pane for small things: chips, tags, list rows. Same frosting, less
+   fill, smaller radius, cheaper blur. */
+.glass-chip {
+  position: relative;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.66);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgb(255 255 255 / 0.7);
+  box-shadow:
+    0 1px 0 0 rgb(255 255 255 / 0.9) inset,
+    0 10px 24px -14px rgb(9 50 51 / 0.3);
+}
+
+/* The inset well: a pane inside a pane, no extra blur (blur stacking is the
+   fastest way to make glass slow). */
+.glass-inset {
+  border-radius: calc(var(--glass-radius) - 0.5rem);
+  background: rgb(255 255 255 / 0.5);
+  border: 1px solid rgb(255 255 255 / 0.6);
+  box-shadow: 0 1px 0 0 rgb(255 255 255 / 0.8) inset;
+}
+
+/* The weighty pane: deep-teal glass carrying ivory text. Tokens are re-pointed
+   exactly like .luxury-panel-dark so every text-paper / text-mute / text-ember
+   utility inside resolves for the dark fill. */
+.glass-dark {
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--glass-radius);
+  background: linear-gradient(
+    160deg,
+    rgb(9 50 51 / 0.9) 0%,
+    rgb(12 58 59 / 0.86) 100%
+  );
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  border: 1px solid rgb(255 255 255 / 0.18);
+  box-shadow:
+    0 1px 0 0 rgb(255 255 255 / 0.22) inset,
+    0 34px 70px -28px rgb(3 20 20 / 0.6);
+  --color-ink: #093233;
+  --color-paper: #f7f4ec;
+  --color-paper-dim: #e5e9e4;
+  --color-mute: #c4d6d5;
+  --color-mute-deep: #b4c9c8;
+  --color-ember: #e6c987;
+  --color-line: rgb(255 255 255 / 0.16);
+  --color-line-strong: rgb(255 255 255 / 0.28);
+  color: var(--color-paper);
+}
+.glass-dark::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    145deg,
+    rgb(255 255 255 / 0.55),
+    rgb(255 255 255 / 0) 40%,
+    rgb(255 255 255 / 0) 65%,
+    rgb(230 201 135 / 0.5)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+/* ---- liquid tab lens ----------------------------------------------------- */
+.glass-lens {
+  position: absolute;
+  inset: 0;
+  border-radius: 1.1rem;
+  background: linear-gradient(
+    140deg,
+    rgb(255 255 255 / 0.95),
+    rgb(255 255 255 / 0.72)
+  );
+  border: 1px solid rgb(255 255 255 / 0.9);
+  box-shadow:
+    0 1px 0 0 #fff inset,
+    0 18px 34px -18px rgb(9 50 51 / 0.45),
+    0 0 0 1px rgb(140 106 36 / 0.22);
+}
+
+/* ---- float --------------------------------------------------------------- */
+@keyframes glass-float {
+  from { transform: translate3d(0, 0, 0) rotate(var(--r, 0deg)); }
+  to   { transform: translate3d(0, -9px, 0) rotate(calc(var(--r, 0deg) + 0.8deg)); }
+}
+.glass-float {
+  transform: rotate(var(--r, 0deg));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .glass-float {
+    animation: glass-float 6.5s ease-in-out var(--d, 0s) infinite alternate;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-blob {
+    animation: none;
+  }
+  .glass::before {
+    display: none;
+  }
+  .glass,
+  .glass-lift:hover,
+  .glass-lift:focus-within {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* ---- fallbacks ------------------------------------------------------------ */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: rgb(255 255 255 / 0.93); }
+  .glass-chip { background: rgb(255 255 255 / 0.92); }
+  .glass-dark { background: rgb(9 50 51 / 0.97); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-chip,
+  .glass-dark {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .glass { background: rgb(255 255 255 / 0.95); }
+  .glass-chip { background: rgb(255 255 255 / 0.95); }
+  .glass-dark { background: rgb(9 50 51 / 0.98); }
+}
+
+/* ---- existing components, re-skinned on the glass page --------------------- */
+/* The shared CTA band, when it sits on the glass page. */
+[data-glass] .cta-panel,
+[data-glass] .cta-tile {
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+  background: linear-gradient(140deg, rgb(255 255 255 / 0.78), rgb(255 255 255 / 0.6));
+  border: 1px solid rgb(255 255 255 / 0.7);
+  box-shadow:
+    0 1px 0 0 rgb(255 255 255 / 0.95) inset,
+    0 24px 50px -28px rgb(9 50 51 / 0.4);
+}
+[data-glass] .cta-tile {
+  border-radius: 1.1rem;
+}
+[data-glass] .cta-panel {
+  border-radius: 1.5rem;
+}
+[data-glass] .cta-band .grid-field {
+  opacity: 0.25;
+}
+
+/* Services density: the shared CTA band keeps its own layout but drops to the
+   page's compact rhythm. */
+[data-glass] .cta-band {
+  border-top: 0;
+  padding-bottom: clamp(3rem, 2rem + 3vw, 5rem);
+}
+[data-glass] .cta-band > .container-page {
+  padding-top: clamp(3rem, 2rem + 3vw, 5rem);
+}
