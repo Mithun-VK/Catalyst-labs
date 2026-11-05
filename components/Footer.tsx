@@ -51,6 +51,7 @@ export function Footer() {
                   {item.label}
                 </FooterLink>
               ))}
+              <FooterLink href="/blog">Insights</FooterLink>
               <FooterLink href="/contact">Contact</FooterLink>
             </FooterColumn>
 

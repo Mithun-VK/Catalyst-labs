@@ -341,3 +341,19 @@
 [data-glass] .cta-band > .container-page {
   padding-top: clamp(3rem, 2rem + 3vw, 5rem);
 }
+
+/* Phones: lighter frosting. backdrop-filter cost scales with blur radius and
+   pane area, and phones have the least GPU headroom. Same look, less work. */
+@media (max-width: 767px) {
+  [data-glass] {
+    --glass-blur: 12px;
+    --glass-sat: 140%;
+  }
+  .glass-chip {
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    backdrop-filter: blur(8px) saturate(140%);
+  }
+  .glass-blob {
+    animation-duration: 60s;
+  }
+}

@@ -4,6 +4,7 @@ import { projects, alsoBuilt, STATUS_LABEL } from "@/content/projects";
 import { processStages } from "@/content/process";
 import { caseStudies } from "@/content/case-studies";
 import { locations } from "@/content/locations";
+import { posts } from "@/content/posts";
 import { siteFaqs } from "@/lib/faq";
 
 const u = (path = "") => `${site.url}${path}`;
@@ -36,6 +37,9 @@ export function buildLlmsTxt(): string {
     "",
     "## Where we work",
     ...locations.map((l) => `- [${l.seoTitle.split(" | ")[0]}](${u(`/${l.slug}`)}): ${l.seoDescription}`),
+    "",
+    "## Insights",
+    ...posts.map((p) => `- [${p.title}](${u(`/blog/${p.slug}`)}): ${p.description}`),
     "",
     "## Optional",
     `- [Full content in one file](${u("/llms-full.txt")})`,

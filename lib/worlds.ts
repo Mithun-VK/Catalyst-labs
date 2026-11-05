@@ -81,6 +81,7 @@ const ROUTE_WORLDS: ReadonlyArray<readonly [string, WorldId]> = [
   // "/ai-automation-chennai" is not swallowed by that prefix.
   ["/ai-automation-chennai", "atelier"],
   ["/software-development", "atelier"],
+  ["/blog", "atelier"],
   ["/work", "poster"],
   ["/services", "atelier"],
   ["/process", "atelier"],

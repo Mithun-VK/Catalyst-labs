@@ -3,6 +3,7 @@ import { site } from "@/lib/site";
 import { services } from "@/content/services";
 import { caseStudies } from "@/content/case-studies";
 import { locations } from "@/content/locations";
+import { posts } from "@/content/posts";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -40,7 +41,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     freq: "monthly" as const,
   }));
 
-  return [...routes, ...servicePages, ...caseStudyPages, ...locationPages].map((route) => ({
+  const blogPages = [
+    { path: "/blog", priority: 0.6, freq: "weekly" as const },
+    ...posts.map((p) => ({ path: `/blog/${p.slug}`, priority: 0.6, freq: "yearly" as const })),
+  ];
+
+  return [...routes, ...servicePages, ...caseStudyPages, ...locationPages, ...blogPages].map((route) => ({
     url: `${site.url}${route.path}`,
     lastModified: now,
     changeFrequency: route.freq,
