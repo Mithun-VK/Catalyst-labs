@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { BookingButton } from "@/components/ui/BookingButton";
 import { cn } from "@/lib/cn";
@@ -188,12 +189,12 @@ export function CtaBrief({
         </p>
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <BookingButton location="cta_success" variant="primary" size="md" />
-          <a
+          <Link
             href="/contact"
             className="text-small text-paper underline underline-offset-4 hover:text-ember"
           >
             Add more detail
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -325,9 +326,9 @@ export function CtaBrief({
         </Button>
         <p className="text-[0.8125rem] leading-snug text-mute-deep">
           No obligation. Reply within one working day. NDA on request.{" "}
-          <a href="/privacy" className="underline underline-offset-4 hover:text-paper">
+          <Link href="/privacy" className="underline underline-offset-4 hover:text-paper">
             Privacy
-          </a>
+          </Link>
         </p>
       </div>
     </form>

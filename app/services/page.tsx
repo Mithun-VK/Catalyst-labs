@@ -15,7 +15,7 @@ import { ServicesFaq } from "@/components/sections/services/ServicesFaq";
 import { CTABand } from "@/components/sections/CTABand";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Software, AI & Automation Services | Catalyst Labs",
+  title: "Software & AI Automation Services in India | Catalyst Labs",
   description:
     "Custom software, AI automation, web and mobile apps built in India for US, UK, EU and Indian businesses. Fixed-scope proposals, clear ownership.",
   path: "/services",

@@ -103,7 +103,7 @@ export const services: Service[] = [
       },
     ],
     seoTitle:
-      "AI Automation & AI Agents for Business | Catalyst Labs",
+      "AI Automation & AI Agents in Chennai | Catalyst Labs",
     seoDescription:
       "AI agents wired into your CRM, WhatsApp and documents, so enquiries, support and data entry run without anyone starting them.",
   },
@@ -251,7 +251,7 @@ export const services: Service[] = [
       },
     ],
     seoTitle:
-      "High-Quality Website Design & Development | Catalyst Labs",
+      "Website & Web App Development in Chennai | Catalyst Labs",
     seoDescription:
       "Fast, accessible websites and web apps built to convert, measured on a real mid-range phone. Custom-built for your brand, never templated.",
   },
@@ -325,7 +325,7 @@ export const services: Service[] = [
       },
     ],
     seoTitle:
-      "Mobile App Development, iOS & Android | Catalyst Labs",
+      "Mobile App Development in Chennai, India | Catalyst Labs",
     seoDescription:
       "iOS and Android apps built with the backend, offline handling and release pipeline that keep them working a year after launch.",
   },
@@ -399,7 +399,7 @@ export const services: Service[] = [
       },
     ],
     seoTitle:
-      "SaaS & MVP Product Development Studio | Catalyst Labs",
+      "SaaS & MVP Development Company in India | Catalyst Labs",
     seoDescription:
       "Get your product in front of paying users this quarter. Auth, billing and tenancy done properly, so version two builds on version one.",
   },
@@ -473,7 +473,7 @@ export const services: Service[] = [
       },
     ],
     seoTitle:
-      "API, Data & Systems Integration Services | Catalyst Labs",
+      "API, Data & Systems Integration in India | Catalyst Labs",
     seoDescription:
       "Connect the CRM, billing and spreadsheets that ignore each other, with retries and alerting, so one dashboard shows the real numbers.",
   },

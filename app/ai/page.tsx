@@ -9,7 +9,7 @@ import { Impact } from "@/components/sections/Impact";
 import { CTABand } from "@/components/sections/CTABand";
 
 export const metadata: Metadata = buildMetadata({
-  title: "AI Automation for Business Operations | Catalyst Labs",
+  title: "AI Automation Company in Chennai & India | Catalyst Labs",
   description:
     "Watch real AI workflows end to end, from customer message to business action. Built into your systems so the model can act, not just chat.",
   path: "/ai",

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { nav, site, whatsappLink } from "@/lib/site";
 import { services } from "@/content/services";
+import { locations } from "@/content/locations";
 import { LogoMark } from "@/components/ui/Logo";
 import { Reveal } from "@/components/ui/Reveal";
 
@@ -43,7 +44,7 @@ export function Footer() {
           </div>
 
           {/* Columns */}
-          <div className="grid gap-10 sm:grid-cols-3 lg:col-span-7">
+          <div className="grid gap-10 sm:grid-cols-2 lg:col-span-7 lg:grid-cols-4">
             <FooterColumn title="Navigate">
               {nav.map((item) => (
                 <FooterLink key={item.href} href={item.href}>
@@ -57,6 +58,14 @@ export function Footer() {
               {services.map((service) => (
                 <FooterLink key={service.id} href={`/services/${service.id}`}>
                   {service.title}
+                </FooterLink>
+              ))}
+            </FooterColumn>
+
+            <FooterColumn title="Where we work">
+              {locations.map((l) => (
+                <FooterLink key={l.slug} href={`/${l.slug}`}>
+                  {l.seoTitle.split(" | ")[0]}
                 </FooterLink>
               ))}
             </FooterColumn>

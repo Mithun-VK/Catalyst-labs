@@ -77,6 +77,10 @@ export const worlds: Record<WorldId, World> = {
  * the services world without needing its own entry.
  */
 const ROUTE_WORLDS: ReadonlyArray<readonly [string, WorldId]> = [
+  // Location landing pages share the atelier look. Listed before "/ai" so that
+  // "/ai-automation-chennai" is not swallowed by that prefix.
+  ["/ai-automation-chennai", "atelier"],
+  ["/software-development", "atelier"],
   ["/work", "poster"],
   ["/services", "atelier"],
   ["/process", "atelier"],

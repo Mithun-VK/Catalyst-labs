@@ -159,6 +159,16 @@ export function PracticeExplorer() {
                             +{s.deliverables.length - 3} more
                           </li>
                         ) : null}
+                        {/* A real link on every card, open or not, so each practice page
+                            is reachable from /services in the server-rendered HTML. */}
+                        <li className="mt-1">
+                          <Link
+                            href={`/services/${s.id}`}
+                            className="text-small text-ember underline-offset-4 hover:underline"
+                          >
+                            {s.title} details <span aria-hidden="true">→</span>
+                          </Link>
+                        </li>
                       </motion.ul>
                     ) : null}
 

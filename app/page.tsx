@@ -12,7 +12,7 @@ import { ChainStrip } from "@/components/visuals/ChainStrip";
 import { Reveal } from "@/components/ui/Reveal";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Website & Software Development in Chennai | Catalyst Labs",
+  title: "AI Automation & Software Company in Chennai | Catalyst Labs",
   description:
     "Software & AI development company in India for US, UK and EU clients. Custom software, web apps and automation from Chennai. Fixed-scope proposals.",
   path: "",

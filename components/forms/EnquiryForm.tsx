@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import {
   BUDGETS_BY_CURRENCY,
   CONTACT_METHODS,
@@ -437,9 +438,9 @@ export function EnquiryForm() {
         <p className="max-w-xs text-[0.8125rem] text-mute-deep">
           We use these details only to reply to your enquiry. Nothing is shared or
           sold. See our{" "}
-          <a href="/privacy" className="underline underline-offset-4 hover:text-paper">
+          <Link href="/privacy" className="underline underline-offset-4 hover:text-paper">
             privacy policy
-          </a>
+          </Link>
           .
         </p>
 
