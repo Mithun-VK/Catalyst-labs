@@ -106,7 +106,7 @@ export default async function ServiceDetailPage({
           { label: "Services", href: "/services" },
           { label: service.title },
         ]}
-        title={service.title}
+        title={service.h1 ?? service.title}
         lead={service.tagline}
         actions={
           <>

@@ -130,8 +130,8 @@ export function Hero() {
                 animationDelay: "420ms",
               }}
             >
-              {site.name} builds software products, AI systems, automation
-              platforms and digital infrastructure -{" "}
+              {site.name} is a {site.location.city} studio building software products,
+              AI systems, automation platforms and digital infrastructure -{" "}
               <span className="text-paper">
                 engineered around the way your business actually works
               </span>

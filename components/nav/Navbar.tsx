@@ -92,6 +92,7 @@ export function Navbar() {
           colliding with the links. 95% keeps the depth cue and stays clean
           without depending on the filter landing. */}
       <header
+        id="site-nav"
         className={`fixed inset-x-0 top-0 z-(--z-nav) transition-[background-color,border-color,backdrop-filter] duration-(--duration-slow) ease-(--ease-out-soft) ${
           condensed
             ? "border-b border-line bg-ink/95 backdrop-blur-xl backdrop-saturate-150"

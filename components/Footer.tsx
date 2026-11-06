@@ -16,7 +16,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="relative border-t border-line">
+    <footer id="site-footer" className="relative border-t border-line">
       <div className="container-page py-16 sm:py-20">
         <div className="grid gap-x-(--space-gutter) gap-y-12 lg:grid-cols-12">
           {/* Brand */}

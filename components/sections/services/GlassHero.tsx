@@ -36,7 +36,7 @@ export function GlassHero() {
 
             <h1
               id="services-heading"
-              className="mt-7 max-w-[14ch] text-paper"
+              className="mt-7 max-w-[15ch] text-paper"
               style={{
                 fontSize: "clamp(2.5rem, 1rem + 4.8vw, 5rem)",
                 lineHeight: "0.98",
@@ -44,7 +44,7 @@ export function GlassHero() {
                 fontWeight: 500,
               }}
             >
-              <TextReveal lines={["Engineering,", "commissioned", "deliberately."]} />
+              <TextReveal lines={["Software & AI", "services, built", "deliberately."]} />
             </h1>
 
             <p className="mt-6 max-w-[52ch] text-lead text-mute">

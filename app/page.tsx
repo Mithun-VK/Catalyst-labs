@@ -14,7 +14,7 @@ import { Reveal } from "@/components/ui/Reveal";
 export const metadata: Metadata = buildMetadata({
   title: "AI Automation & Software Company in Chennai | Catalyst Labs",
   description:
-    "Software & AI development company in India for US, UK and EU clients. Custom software, web apps and automation from Chennai. Fixed-scope proposals.",
+    "AI automation, custom software and websites from Chennai for businesses in India, the US, UK and EU. Fixed-scope proposals, code you own.",
   path: "",
 });
 

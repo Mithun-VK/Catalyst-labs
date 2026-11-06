@@ -2749,3 +2749,11 @@ body:has([data-world="system"]) {
     box-shadow: var(--shadow-panel);
   }
 }
+
+/* Campaign landing pages (/linkedin) render without site chrome: one offer,
+   one action, nothing to wander off to. The page opts in with
+   [data-chromeless]; same body:has() switch the worlds use. */
+body:has([data-chromeless]) #site-nav,
+body:has([data-chromeless]) #site-footer {
+  display: none;
+}

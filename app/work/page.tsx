@@ -12,7 +12,7 @@ import { projects } from "@/content/projects";
 export const metadata: Metadata = buildMetadata({
   title: "Our Work: Systems We Build & How | Catalyst Labs",
   description:
-    "Fraud scoring in production, a quantitative trading stack, a compliance platform, a fashion storefront and live client sites. Real engineering detail, no invented client claims.",
+    "E-commerce with virtual try-on, a fraud-scoring API and live client sites. Case studies with real engineering detail and sourced numbers, from Chennai.",
   path: "/work",
 });
 

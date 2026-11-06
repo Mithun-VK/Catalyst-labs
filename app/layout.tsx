@@ -10,6 +10,7 @@ import { StructuredData } from "@/components/seo/StructuredData";
 import { SpotlightRoot } from "@/components/ui/SpotlightRoot";
 import { CustomCursor } from "@/components/ui/CustomCursor";
 import { RouteTransition } from "@/components/transitions/RouteTransition";
+import { MobileCtaBar } from "@/components/cta/MobileCtaBar";
 
 /**
  * Three families, latin subset, SELF-HOSTED.
@@ -158,8 +159,19 @@ export default function RootLayout({
           <RouteTransition>{children}</RouteTransition>
         </main>
         <Footer />
+        <MobileCtaBar />
         <StructuredData />
         <AttributionCapture />
+        {/* Queue stub: CTA clicks made before the deferred script loads are
+            replayed by Plausible instead of being dropped. */}
+        {process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ? (
+          <script
+            dangerouslySetInnerHTML={{
+              __html:
+                "window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments)}",
+            }}
+          />
+        ) : null}
         {process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ? (
           <Script
             defer

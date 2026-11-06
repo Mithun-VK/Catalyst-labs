@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { site } from "./site";
+import { ogImagePath } from "./og-cards";
 
 /**
  * SEO metadata builder.
@@ -18,10 +19,17 @@ import { site } from "./site";
 const TITLE_MAX = 60;
 const DESCRIPTION_MAX = 155;
 
+/**
+ * 1200x630 is the 1.91:1 ratio LinkedIn, Facebook, X and WhatsApp all crop
+ * to. LinkedIn's docs quote 1200x627; the 3px difference is absorbed by the
+ * same crop, so one size serves every network.
+ */
+export const OG_SIZE = { width: 1200, height: 630 };
+
 export const OG_IMAGE = {
   url: `${site.url}/opengraph-image`,
-  width: 1200,
-  height: 630,
+  width: OG_SIZE.width,
+  height: OG_SIZE.height,
   alt: `${site.name} - software, AI and automation engineering`,
 };
 
@@ -56,6 +64,10 @@ export function buildMetadata({
   }
 
   const url = `${site.url}${path}`;
+  const card = ogImagePath(path);
+  const image = card
+    ? { url: `${site.url}${card}`, width: OG_IMAGE.width, height: OG_IMAGE.height, alt: title }
+    : OG_IMAGE;
 
   return {
     title: { absolute: title },
@@ -81,13 +93,13 @@ export function buildMetadata({
       title,
       description,
       url,
-      images: [OG_IMAGE],
+      images: [image],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [OG_IMAGE.url],
+      images: [image.url],
     },
   };
 }

@@ -79,7 +79,7 @@ export const site = {
 
   /** Add real profiles only. An empty string hides the link entirely. */
   social: {
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/company/catalyst-labs-org/",
     instagram: "",
     github: "",
     x: "",

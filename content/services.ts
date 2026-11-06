@@ -30,6 +30,9 @@ export type Service = {
      being compromised. Budgets: title <=60, description <=155. */
   seoTitle: string;
   seoDescription: string;
+  /** Keyword-bearing H1 for the detail page. `title` stays the short label
+      used in navigation, cards and breadcrumbs. */
+  h1?: string;
 };
 
 export const services: Service[] = [
@@ -102,6 +105,7 @@ export const services: Service[] = [
         a: "Model usage is metered, so we design for it - smaller models on the easy paths, caching, and retrieval instead of stuffing context. Running cost is estimated during architecture and tracked in production, not discovered on the first invoice.",
       },
     ],
+    h1: "AI automation and AI agents for businesses in Chennai",
     seoTitle:
       "AI Automation & AI Agents in Chennai | Catalyst Labs",
     seoDescription:
@@ -176,6 +180,7 @@ export const services: Service[] = [
         a: "Yes, and it is built on that assumption: standard technology, typed code, documented decisions and access to the repository from day one. You are not renting your own system back from us.",
       },
     ],
+    h1: "Custom software development in Chennai",
     seoTitle:
       "Custom Software Development in Chennai | Catalyst Labs",
     seoDescription:
@@ -250,6 +255,7 @@ export const services: Service[] = [
         a: "We target Core Web Vitals in the 'good' band on a mid-range Android over 4G, not on a developer laptop. The specific budget is agreed during architecture and it is testable.",
       },
     ],
+    h1: "Website and web app development in Chennai",
     seoTitle:
       "Website & Web App Development in Chennai | Catalyst Labs",
     seoDescription:
@@ -324,6 +330,7 @@ export const services: Service[] = [
         a: "We audit it first: what is salvageable, what is holding it back, and whether extending it is cheaper than replacing it. Sometimes the honest answer is that a rebuild costs less than another year of patches.",
       },
     ],
+    h1: "Mobile app development in Chennai for iOS and Android",
     seoTitle:
       "Mobile App Development in Chennai, India | Catalyst Labs",
     seoDescription:
@@ -398,6 +405,7 @@ export const services: Service[] = [
         a: "That is what shipping early and instrumenting it is for. Finding out in month three costs a great deal less than finding out in month twelve, and we would rather you learned it cheaply.",
       },
     ],
+    h1: "SaaS and MVP development for founders in India",
     seoTitle:
       "SaaS & MVP Development Company in India | Catalyst Labs",
     seoDescription:
@@ -472,6 +480,7 @@ export const services: Service[] = [
         a: "Sometimes - that is outside anyone's control. What we control is that it fails loudly and immediately, with an alert and a clear error, rather than quietly writing wrong data for a month.",
       },
     ],
+    h1: "API, data and systems integration in India",
     seoTitle:
       "API, Data & Systems Integration in India | Catalyst Labs",
     seoDescription:
