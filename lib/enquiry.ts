@@ -86,6 +86,7 @@ export type EnquiryInput = {
   utmSource: string;
   utmMedium: string;
   utmCampaign: string;
+  utmContent: string;
   referrer: string;
   landingPage: string;
   /** Free-form origin tag from ?source=, e.g. "work-safemerchant". */
@@ -140,6 +141,7 @@ export function emptyEnquiry(): EnquiryInput {
     utmSource: "",
     utmMedium: "",
     utmCampaign: "",
+    utmContent: "",
     referrer: "",
     landingPage: "",
     source: "",

@@ -8,6 +8,8 @@
  * [label](/path) and are turned into <Link> by the renderer.
  */
 
+import { clinicPosts } from "./clinic";
+
 export type Block =
   | { t: "p"; text: string }
   | { t: "h2"; text: string }
@@ -30,7 +32,7 @@ export type Post = {
   body: Block[];
 };
 
-export const posts: Post[] = [
+const articles: Post[] = [
   {
     slug: "how-much-does-custom-software-cost-in-india",
     title: "How much does custom software cost in India?",
@@ -328,4 +330,7 @@ export const posts: Post[] = [
   },
 ];
 
-export const getPost = (slug: string) => posts.find((p) => p.slug === slug);
+/** Articles plus any published Website Clinic issues (content/clinic.ts). */
+export const posts: Post[] = [...articles, ...clinicPosts];
+
+export const getPost =(slug: string) => posts.find((p) => p.slug === slug);

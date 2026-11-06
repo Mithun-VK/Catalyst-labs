@@ -21,6 +21,10 @@ import { site } from "@/lib/site";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+/** Sent by components/forms/AuditForm.tsx. Keep AUDIT_TURNAROUND equal to OFFER.turnaround in app/linkedin/page.tsx. */
+const AUDIT_PROJECT_TYPE = "Free audit";
+const AUDIT_TURNAROUND = "2 working days";
+
 /* -------------------------------------------------------------------------
    Rate limiting.
    In-memory and therefore per-instance: it stops casual flooding, not a
@@ -130,6 +134,7 @@ export async function POST(request: Request) {
     utmSource: field(body.utmSource),
     utmMedium: field(body.utmMedium),
     utmCampaign: field(body.utmCampaign),
+    utmContent: field(body.utmContent),
     referrer: field(body.referrer),
     landingPage: field(body.landingPage),
     receivedAt: new Date().toISOString(),
@@ -246,24 +251,41 @@ async function sendAutoReply(enquiry: Enquiry): Promise<void> {
 
   const firstName = enquiry.name.split(/\s+/)[0];
   const processUrl = `${site.url}/process`;
-  const text = [
-    `Hi ${firstName},`,
-    "",
-    "Thanks for getting in touch with Catalyst Labs. We have your enquiry and will reply personally within one business day (we work on IST, UTC+5:30).",
-    "",
-    "What happens next:",
-    "1. We read your brief and may come back with a question or two.",
-    "2. If there looks to be a fit, we book a short call.",
-    "3. After that you receive a written scope and a fixed proposal.",
-    "",
-    `How an engagement runs, stage by stage: ${processUrl}`,
-    "",
-    "If anything is urgent, just reply to this email.",
-    "",
-    `${site.founder.name}`,
-    `${site.name}, ${site.location.city}`,
-    site.url,
-  ].join("\n");
+  const isAudit = enquiry.projectType === AUDIT_PROJECT_TYPE;
+  const text = (
+    isAudit
+      ? [
+          `Hi ${firstName},`,
+          "",
+          `Thanks for sending ${enquiry.currentProduct || "your website"}. Your written review will reach you at this address within ${AUDIT_TURNAROUND} (we work on IST, UTC+5:30).`,
+          "",
+          "It covers speed on a phone, Google and local search, your enquiry flow, and one process we would automate first. Everything in it you can do yourself or with your current developer.",
+          "",
+          "If you want to add anything, just reply to this email.",
+          "",
+          `${site.founder.name}`,
+          `${site.name}, ${site.location.city}`,
+          site.url,
+        ]
+      : [
+          `Hi ${firstName},`,
+          "",
+          "Thanks for getting in touch with Catalyst Labs. We have your enquiry and will reply personally within one business day (we work on IST, UTC+5:30).",
+          "",
+          "What happens next:",
+          "1. We read your brief and may come back with a question or two.",
+          "2. If there looks to be a fit, we book a short call.",
+          "3. After that you receive a written scope and a fixed proposal.",
+          "",
+          `How an engagement runs, stage by stage: ${processUrl}`,
+          "",
+          "If anything is urgent, just reply to this email.",
+          "",
+          `${site.founder.name}`,
+          `${site.name}, ${site.location.city}`,
+          site.url,
+        ]
+  ).join("\n");
 
   const html = `<div style="font-family:ui-sans-serif,system-ui,sans-serif;font-size:14px;line-height:1.6">${text
     .split("\n")
@@ -280,7 +302,9 @@ async function sendAutoReply(enquiry: Enquiry): Promise<void> {
       from,
       to: [enquiry.email],
       reply_to: replyTo,
-      subject: "We received your enquiry - Catalyst Labs",
+      subject: isAudit
+        ? "We received your website - Catalyst Labs"
+        : "We received your enquiry - Catalyst Labs",
       html,
       text,
     }),

@@ -15,6 +15,8 @@ export type Attribution = {
   utmSource: string;
   utmMedium: string;
   utmCampaign: string;
+  /** Which post or link produced the visit, e.g. "2026-11-18-announce". */
+  utmContent: string;
   referrer: string;
   landingPage: string;
   source: string;
@@ -44,6 +46,7 @@ export function captureAttribution(): void {
       utmSource: clip(params.get("utm_source")),
       utmMedium: clip(params.get("utm_medium")),
       utmCampaign: clip(params.get("utm_campaign")),
+      utmContent: clip(params.get("utm_content")),
       referrer: clip(external),
       landingPage: clip(window.location.pathname),
       source: clip(params.get("source")),
@@ -59,6 +62,7 @@ export function readAttribution(): Attribution {
     utmSource: "",
     utmMedium: "",
     utmCampaign: "",
+    utmContent: "",
     referrer: "",
     landingPage: "",
     source: "",
